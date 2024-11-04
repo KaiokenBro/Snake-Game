@@ -74,7 +74,6 @@ public sealed class NetworkConnection : IDisposable
         }
     }
 
-
     /// <summary>
     ///     Try to connect to the given host:port. 
     /// </summary>
@@ -86,7 +85,6 @@ public sealed class NetworkConnection : IDisposable
         // TODO: implement this
         throw new NotImplementedException();
     }
-
 
     /// <summary>
     ///     Send a message to the remote server.  If the <paramref name="message"/> contains
@@ -103,7 +101,6 @@ public sealed class NetworkConnection : IDisposable
         // TODO: Implement this
         throw new NotImplementedException();
     }
-
 
     /// <summary>
     ///     Read a message from the remote side of the connection.  The message will contain
