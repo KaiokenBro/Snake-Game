@@ -37,7 +37,7 @@ public sealed class NetworkConnection : IDisposable
     {
         get
         {
-            return _tcpClient != null && _tcpClient.Connected;
+            return _tcpClient.Connected;
         }
     }
 
@@ -149,7 +149,7 @@ public sealed class NetworkConnection : IDisposable
     {
 
         // Check that client is connected
-        if (_tcpClient != null)
+        if (IsConnected)
         {
             _reader?.Dispose();
             _writer?.Dispose();
