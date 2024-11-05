@@ -38,19 +38,38 @@ public partial class ChatServer
     ///
     private static void HandleConnect(NetworkConnection connection)
     {
-        // handle all messages until disconnect.
+        // Handle all messages until disconnect.
         try
         {
             while (true)
             {
                 var message = connection.ReadLine();
 
-                connection.Send("thanks!");
+                // Detects client disconnection
+                if (message == null)
+                {
+                    Console.WriteLine("Client Disconnected");
+                    break;
+                }
+
+                // Confirm message recieved from client
+                Console.WriteLine("Recieved from client: " + message);
+
+                // Respond to client
+                connection.Send("Thanks!");
             }
         }
         catch (Exception)
         {
-            // do anything necessary to handle a disconnected client in here
+            Console.WriteLine("Error handling client.");
+        }
+        finally
+        {
+            // Disconnect client
+            connection.Disconnect();
+
+            // Confirm client disconnected
+            Console.WriteLine("Client connection closed.");
         }
     }
 }

@@ -41,14 +41,16 @@ public static class Server
         // Confirm server started
         Console.WriteLine("Server started on port: " + port);
 
+        // Infinite Loop
         while (true)
         {
             // Create new client
             TcpClient client = listener.AcceptTcpClient();
 
             // Confirm client connected 
-            Console.WriteLine("Client connected");
+            Console.WriteLine("Client connected.");
 
+            // Create new thread for client
             new Thread(() => handleConnect(new NetworkConnection(client))).Start();
         }
     }
