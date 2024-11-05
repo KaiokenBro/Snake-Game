@@ -8,6 +8,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace CS3500.Networking;
 
@@ -17,6 +18,9 @@ namespace CS3500.Networking;
 /// </summary>
 public static class Server
 {
+    /// <summary>
+    /// 
+    /// </summary>
 
     /// <summary>
     ///     Wait on a TcpListener for new connections. Alert the main program
@@ -32,6 +36,16 @@ public static class Server
     public static void StartServer(Action<NetworkConnection> handleConnect, int port)
     {
         // TODO: Implement this
-        throw new NotImplementedException();
+        TcpListener listener = new(IPAddress.Any, port);
+
+        listener.Start();
+
+        while (true)
+        {
+
+            TcpClient client = listener.AcceptTcpClient();
+            new Thread(() => handleConnect(new NetworkConnection(client))).Start();
+
+        }
     }
 }

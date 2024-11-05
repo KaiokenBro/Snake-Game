@@ -70,7 +70,7 @@ public sealed class NetworkConnection : IDisposable
         get
         {
             // TODO: implement this
-            throw new NotImplementedException();
+            return _tcpClient.Connected;
         }
     }
 
@@ -84,7 +84,7 @@ public sealed class NetworkConnection : IDisposable
     public void Connect(string host, int port)
     {
         // TODO: implement this
-        throw new NotImplementedException();
+        _tcpClient.Connect(host, port);
     }
 
 
@@ -101,7 +101,11 @@ public sealed class NetworkConnection : IDisposable
     public void Send(string message)
     {
         // TODO: Implement this
-        throw new NotImplementedException();
+        if (!IsConnected)
+        {
+            throw new InvalidOperationException();
+        }
+        _writer?.WriteLine(message);
     }
 
 
@@ -116,7 +120,13 @@ public sealed class NetworkConnection : IDisposable
     public string ReadLine()
     {
         // TODO: implement this
-        throw new NotImplementedException();
+        if (!IsConnected)
+        {
+            throw new InvalidOperationException();
+        }
+        string? message = _reader?.ReadLine();
+
+
 
     }
 
