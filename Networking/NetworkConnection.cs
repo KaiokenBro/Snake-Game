@@ -31,6 +31,17 @@ public sealed class NetworkConnection : IDisposable
     private StreamWriter? _writer = null;
 
     /// <summary>
+    ///     Gets a value indicating whether the socket is connected.
+    /// </summary>
+    public bool IsConnected
+    {
+        get
+        {
+            return _tcpClient != null && _tcpClient.Connected;
+        }
+    }
+
+    /// <summary>
     ///     Initializes a new instance of the <see cref="NetworkConnection"/> class.
     ///     <para>
     ///         Create a network connection object.
@@ -63,18 +74,6 @@ public sealed class NetworkConnection : IDisposable
     }
 
     /// <summary>
-    ///     Gets a value indicating whether the socket is connected.
-    /// </summary>
-    public bool IsConnected
-    {
-        get
-        {
-            // TODO: implement this
-            return _tcpClient.Connected;
-        }
-    }
-
-    /// <summary>
     ///     Try to connect to the given host:port. 
     /// </summary>
     /// 
@@ -82,8 +81,22 @@ public sealed class NetworkConnection : IDisposable
     /// <param name="port"> The port, e.g., 11000. </param>
     public void Connect(string host, int port)
     {
-        // TODO: implement this
-        _tcpClient.Connect(host, port);
+
+        if (!IsConnected)
+        {
+            _tcpClient.Connect(host, port);
+
+            if (_reader == null || _writer == null)
+            {
+                _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
+                _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+            }
+        }
+
+        else
+        {
+            throw new InvalidOperationException("Already connected.");
+        }
     }
 
     /// <summary>
@@ -98,11 +111,12 @@ public sealed class NetworkConnection : IDisposable
     /// <param name="message"> The string of characters to send. </param>
     public void Send(string message)
     {
-        // TODO: Implement this
+
         if (!IsConnected)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot send message, connection is closed.");
         }
+
         _writer?.WriteLine(message);
     }
 
@@ -116,15 +130,15 @@ public sealed class NetworkConnection : IDisposable
     /// <returns> The contents of the message. </returns>
     public string ReadLine()
     {
-        // TODO: implement this
+
         if (!IsConnected)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot read data, connection is closed.");
         }
+
         string? message = _reader?.ReadLine();
 
-
-
+        return message ??string.Empty;
     }
 
     /// <summary>

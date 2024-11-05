@@ -59,9 +59,9 @@ public partial class ChatServer
                 connection.Send("Thanks!");
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Console.WriteLine("Error handling client.");
+            Console.WriteLine("Error handling client: " + ex.Message);
         }
         finally
         {
