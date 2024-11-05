@@ -7,6 +7,7 @@
 
 using System.Net.Sockets;
 using System.Text;
+
 namespace CS3500.Networking;
 
 /// <summary>

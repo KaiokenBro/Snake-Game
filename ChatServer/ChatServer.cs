@@ -35,7 +35,6 @@ public partial class ChatServer
     ///         replies to a client.
     ///     </pre>
     /// </summary>
-    ///
     private static void HandleConnect(NetworkConnection connection)
     {
         // Handle all messages until disconnect.
