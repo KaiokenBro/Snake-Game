@@ -133,8 +133,14 @@ public sealed class NetworkConnection : IDisposable
     /// </summary>
     public void Disconnect()
     {
-        //TODO: implement this
-        throw new NotImplementedException();
+
+        // Check that client is connected
+        if (_tcpClient != null)
+        {
+            _reader?.Dispose();
+            _writer?.Dispose();
+            _tcpClient.Close();
+        }
     }
 
     /// <summary>
