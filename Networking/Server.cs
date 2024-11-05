@@ -18,9 +18,6 @@ namespace CS3500.Networking;
 /// </summary>
 public static class Server
 {
-    /// <summary>
-    /// 
-    /// </summary>
 
     /// <summary>
     ///     Wait on a TcpListener for new connections. Alert the main program
@@ -35,17 +32,24 @@ public static class Server
     /// <param name="port"> The port (e.g., 11000) to listen on. </param>
     public static void StartServer(Action<NetworkConnection> handleConnect, int port)
     {
-        // TODO: Implement this
+        // Add listener
         TcpListener listener = new(IPAddress.Any, port);
 
+        // Start listener
         listener.Start();
+
+        // Confirm server started
+        Console.WriteLine("Server started on port: " + port);
 
         while (true)
         {
-
+            // Create new client
             TcpClient client = listener.AcceptTcpClient();
-            new Thread(() => handleConnect(new NetworkConnection(client))).Start();
 
+            // Confirm client connected 
+            Console.WriteLine("Client connected");
+
+            new Thread(() => handleConnect(new NetworkConnection(client))).Start();
         }
     }
 }
