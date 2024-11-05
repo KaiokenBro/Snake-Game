@@ -10,11 +10,15 @@ using System.Text;
 
 namespace CS3500.Chatting;
 
+
+
 /// <summary>
 ///     A simple ChatServer that handles clients separately and replies with a static message.
 /// </summary>
 public partial class ChatServer
 {
+    private static List<NetworkConnection> clients = new();
+    private static Dictionary<NetworkConnection, string> names = new();
 
     /// <summary>
     ///     The main program.
@@ -37,25 +41,53 @@ public partial class ChatServer
     /// </summary>
     private static void HandleConnect(NetworkConnection connection)
     {
+        string clientName = connection.ReadLine();
+        lock (clients)
+        {
+            clients.Add(connection);
+            //Put client name into its respected client.
+            names[connection] = clientName;
+        }
+
+        //Display who has joined
+        connection.Send($"{clientName} has connected");
+        Console.WriteLine($"{clientName} has connected");
+
         // Handle all messages until disconnect.
         while (true)
         {
             try
             {
+
                 var message = connection.ReadLine();
 
-                // Confirm message recieved from client
-                Console.WriteLine("Recieved from client: " + message);
 
-                // Respond to client
-                connection.Send("Thanks!");
+                //Send messages to all clients and state who sent what
+                lock (clients)
+                {
+                    foreach (var client in clients)
+                    {
+                        client.Send($"{clientName}: {message}");
+                        
+                    }
+                }
+
+                // Confirm message recieved from client
+                Console.WriteLine($"Recieved from client: {clientName}");
             }
             catch (Exception)
             {
-                // Confirm client disconnected
-                Console.WriteLine("Client connection closed.");
+                // Confirm which client disconnected
+                Console.WriteLine($"{names[connection]} has disconnected.");
 
-                // Disconnect client
+                //Clean up the client that left/disconnected
+                lock (clients)
+                {
+                    clients.Remove(connection);
+                    names.Remove(connection);
+                }
+
+                // Disconnect the client client
                 connection.Disconnect();
 
                 return;
