@@ -92,11 +92,6 @@ public sealed class NetworkConnection : IDisposable
                 _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
             }
         }
-
-        else
-        {
-            throw new InvalidOperationException("Already connected.");
-        }
     }
 
     /// <summary>
@@ -130,15 +125,14 @@ public sealed class NetworkConnection : IDisposable
     /// <returns> The contents of the message. </returns>
     public string ReadLine()
     {
-
-        if (!IsConnected)
-        {
-            throw new InvalidOperationException("Cannot read data, connection is closed.");
-        }
-
         string? message = _reader?.ReadLine();
 
-        return message ??string.Empty;
+        if (!IsConnected || message == null)
+        {
+            throw new InvalidOperationException();
+        }
+
+        return message;
     }
 
     /// <summary>
