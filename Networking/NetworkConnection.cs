@@ -55,11 +55,11 @@ public sealed class NetworkConnection : IDisposable
     public NetworkConnection(TcpClient tcpClient)
     {
         _tcpClient = tcpClient;
+
         if (IsConnected)
         {
-            // Only establish the reader/writer if the provided TcpClient is already connected.
             _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true }; // AutoFlush ensures data is sent immediately
+            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
         }
     }
 
@@ -113,7 +113,7 @@ public sealed class NetworkConnection : IDisposable
             throw new InvalidOperationException("Cannot send message, connection is closed.");
         }
 
-        _writer?.WriteLine(message);
+        _writer!.WriteLine(message);
     }
 
     /// <summary>
@@ -142,12 +142,10 @@ public sealed class NetworkConnection : IDisposable
     /// </summary>
     public void Disconnect()
     {
-
-        // Check that client is connected
         if (IsConnected)
         {
-            _reader?.Dispose();
-            _writer?.Dispose();
+            _reader!.Dispose();
+            _writer!.Dispose();
             _tcpClient.Close();
         }
     }
