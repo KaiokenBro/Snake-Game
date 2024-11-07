@@ -17,12 +17,15 @@ namespace CS3500.Chatting;
 public partial class ChatServer
 {
     /// <summary>
-    ///     TODO:
+    ///     A list of active client connections. Each <see cref="NetworkConnection"/>
+    ///     in this list represents a client currently connected to the server.
     /// </summary>
     private static List<NetworkConnection> clients = new();
 
     /// <summary>
-    ///     TODO:
+    ///     A dictionary mapping each client connection to its associated name.
+    ///     The <see cref="NetworkConnection"/> key represents a client, and the 
+    ///     <see cref="string"/> value represents the client's name.
     /// </summary>
     private static Dictionary<NetworkConnection, string> names = new();
 
