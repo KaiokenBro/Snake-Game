@@ -47,65 +47,80 @@ public partial class ChatServer
     /// </summary>
     private static void HandleConnect(NetworkConnection connection)
     {
-        // Welcome clinet, ask for name
-        connection.Send("Welcome! Please enter your name.");
-
-        // Name of client
-        string clientName = connection.ReadLine();
-
-        // Locked
-        lock (clients)
+        try
         {
-            // Add client to List
-            clients.Add(connection);
+            // Welcome clinet, ask for name
+            connection.Send("Host: Welcome! Please enter your name.");
 
-            // Assign client name to its respected client.
-            names[connection] = clientName;
-        }
+            // Name of client
+            string clientName = connection.ReadLine();
 
-        // Notify client they have joined the chat
-        connection.Send($"{clientName} has joined the chat.");
-
-        // Confirm client's name has joined the chat
-        Console.WriteLine($"{clientName} has joined the chat.");
-
-        // Infinite loop handling all messages until client disconnects
-        while (true)
-        {
-            try
+            // Locked to prevent multiple List mutations at the same time
+            lock (clients)
             {
-                // Message from client
-                var message = connection.ReadLine();
+                // Add client to List
+                clients.Add(connection);
 
-                // Broadcast client message to all clients
-                lock (clients)
+                // Assign client name to its respected client.
+                names[connection] = clientName;
+            }
+
+            // Notify client they have joined the chat
+            connection.Send($"Host: {clientName} has joined the chat.");
+
+            // Confirm client's name has joined the chat
+            Console.WriteLine($"{clientName} has joined the chat.");
+
+            // Infinite loop handling all messages until client disconnects
+            while (true)
+            {
+                try
                 {
-                    foreach (var client in clients)
+                    // Message from client
+                    var message = connection.ReadLine();
+
+                    // Locked so only one client can Broadcast at a time.
+                    lock (clients)
                     {
-                        client.Send($"{clientName}: {message}");
+                        foreach (var client in clients)
+                        {
+                            client.Send($"{clientName}: {message}");
+                        }
                     }
+
+                    // Confirm message recieved from client
+                    Console.WriteLine($"Recieved from {clientName}: {message}");
                 }
-
-                // Confirm message recieved from client
-                Console.WriteLine($"Recieved from {clientName}: {message}");
-            }
-            catch (Exception)
-            {
-                // Confirm which client disconnected
-                Console.WriteLine($"{names[connection]} has disconnected.");
-
-                // Clean up the client that disconnected
-                lock (clients)
+                // Handles client disconnecting while in List
+                catch (Exception)
                 {
-                    clients.Remove(connection);
-                    names.Remove(connection);
+                    // Confirm which client disconnected
+                    Console.WriteLine($"{names[connection]} has disconnected.");
+
+                    // Locked to prevent multiple List mutations at the same time
+                    lock (clients)
+                    {
+                        clients.Remove(connection);
+                        names.Remove(connection);
+                    }
+
+                    // Disconnect the client connection
+                    connection.Disconnect();
+
+                    return;
                 }
-
-                // Disconnect the client connection
-                connection.Disconnect();
-
-                return;
             }
+        }
+        // Handles client disconnecting before adding to List
+        catch (Exception)
+        {
+            // Confirm the client disconnected
+            Console.WriteLine("Client has disconnected.");
+
+            // Disconnect the client connection
+            connection.Disconnect();
+
+            return;
         }
     }
 }
