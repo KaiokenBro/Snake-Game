@@ -53,7 +53,7 @@ public partial class ChatServer
         try
         {
             // Welcome clinet, ask for name
-            connection.Send("Host: Welcome! Please enter your name.");
+            connection.Send("Welcome! Please enter your name.");
 
             // Name of client
             string clientName = connection.ReadLine();
@@ -69,7 +69,7 @@ public partial class ChatServer
             }
 
             // Notify client they have joined the chat
-            connection.Send($"Host: {clientName} has joined the chat.");
+            connection.Send("You have succesfully connected to the chat.");
 
             // Confirm client's name has joined the chat
             Console.WriteLine($"{clientName} has joined the chat.");
