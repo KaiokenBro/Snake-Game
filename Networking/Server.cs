@@ -37,19 +37,19 @@ public static class Server
         // Start listener
         listener.Start();
 
-        // Confirm server started to server
+        // Confirm server started
         Console.WriteLine("Server started on port: " + port);
 
         // Infinite Loop accepting new clients until program terminates
         while (true)
         {
-            // Create and connect new client
+            // Create client and connect new client
             TcpClient client = listener.AcceptTcpClient();
 
             // Confirm client connected to server
             Console.WriteLine("Client connected.");
 
-            // Create new thread for client
+            // Create new thread for client and pass it off
             new Thread(() => handleConnect(new NetworkConnection(client))).Start();
         }
     }
