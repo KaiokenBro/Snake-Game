@@ -80,7 +80,7 @@ public partial class ChatServer
                 try
                 {
                     // Message from client
-                    var message = connection.ReadLine();
+                    string message = connection.ReadLine();
 
                     // Locked so only one client can Broadcast at a time.
                     lock (clients)
@@ -92,7 +92,7 @@ public partial class ChatServer
                     }
 
                     // Confirm message recieved from client
-                    Console.WriteLine($"Recieved from {clientName}: {message}");
+                    Console.WriteLine($"Recieved message from {clientName}: {message}");
                 }
                 // Handles client disconnecting while in List
                 catch (Exception)

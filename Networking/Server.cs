@@ -18,7 +18,6 @@ namespace CS3500.Networking;
 /// </summary>
 public static class Server
 {
-
     /// <summary>
     ///     Wait on a TcpListener for new connections. Alert the main program
     ///     via a callback (delegate) mechanism.

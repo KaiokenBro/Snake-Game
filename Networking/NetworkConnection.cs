@@ -7,6 +7,7 @@
 
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CS3500.Networking;
 
@@ -107,7 +108,12 @@ public sealed class NetworkConnection : IDisposable
             throw new InvalidOperationException();
         }
 
-        _writer!.WriteLine(message);
+        string[] lines = Regex.Split(message, @"\\n");
+
+        foreach (string line in lines)
+        {
+            _writer!.WriteLine(line);
+        }
     }
 
     /// <summary>
