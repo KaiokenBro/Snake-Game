@@ -6,6 +6,7 @@
 @using System.Numerics
 @using System.Diagnostics
 @using System.Text.Json
+@using GUI.Client.Models
 @inject IJSRuntime JsRuntime;
 
 <PageTitle>Snake</PageTitle>
@@ -20,6 +21,18 @@
 @code
 {
 
+    // ADDED
+    private const int WorldSize = 1000;
+
+    // ADDED
+    private World TheWorld = new(WorldSize);
+
+    // ADDED (HARDCODED TO CHANGE)
+    private const int ViewWidth = 1000;
+
+    // ADDED (HARDCODED TO CHANGE)
+    private const int ViewHeight = 1000;
+
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
     private IJSObjectReference jsModule = null!;
@@ -32,23 +45,75 @@
     ///     We use this to know when the first page load has occurred so we can initialize various data and start the server and drawing loops. 
     /// </summary>
     /// <param name="firstRender"></param>
-    /// <returns></returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
             context = await canvasReference.CreateCanvas2DAsync();
-            await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));           
+            await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
 
-            // TODO: Start the game loop
+            // Start the game loop
+            GameLoop();
 
-            // in the meantime, draw something to initialize the canvas
-            // you may want to remove this after you are drawing something
-            await context.SetFillStyleAsync("lightblue");
-            await context.FillRectAsync(0, 0, 1000, 1000);
         }
     }
+
+    /// <summary>
+    ///     Renders the view once every 20 miliseconds (50 frames/second)
+    /// </summary>
+    private async void GameLoop()
+    {
+        while (true)
+        {
+            World snapshot = new World(TheWorld);
+
+            await DrawFrame(snapshot);
+
+            Thread.Sleep(20);
+        }
+    }
+
+    /// <summary>
+    ///     Draws one frame of the game.
+    /// </summary>
+    /// <param name="snapshot"></param>
+    private async Task DrawFrame(World snapshot)
+    {
+        // Batch the drawing calls for better performance
+        await context.BeginBatchAsync();
+
+        // HARD CODED NEED TO FIX
+        await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
+
+        // Finish batch drawing
+        await context.EndBatchAsync();
+
+        StateHasChanged();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     [JSInvokable]
     public void HandleKeyPress(string key)
