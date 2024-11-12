@@ -3,40 +3,38 @@
 namespace GUI.Client.Models
 {
     /// <summary>
-    /// A class that represents a 2D point in space (just an X and Y pair).
+    ///     A class that represents a 2D point in space (just an X and Y pair).
     /// </summary>
     public class Point2D
     {
         /// <summary>
-        /// X-coordinate.
+        ///     The X-coordinate.
         /// </summary>
         [JsonInclude]
-        public int X { get; private set; }
+        public int X { get; set; }
 
         /// <summary>
-        /// Y-coordinate.
+        ///     The Y-coordinate.
         /// </summary>
         [JsonInclude]
-        public int Y { get; private set; }
+        public int Y { get; set; }
 
         /// <summary>
-        /// Constructor to initiate a Point2D object.
+        ///     Constructor to create a Point2D with specific coordinates.
         /// </summary>
-        /// <param name="X">X coordinate of the object</param>
-        /// <param name="Y">Y coordinate of the object</param>
-        public Point2D(int X, int Y)
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public Point2D(int x, int y)
         {
-            this.X = X;
-            this.Y = Y;
+            this.X = x;
+            this.Y = y;
         }
 
         /// <summary>
-        /// Empty constructor for Point2D.
+        ///     Default constructor for JSON deserialization
         /// </summary>
         public Point2D()
         {
-           //worry when need to use Json 
         }
-
     }
 }

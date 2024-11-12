@@ -14,9 +14,6 @@
 <!-- Background Image -->
 <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
 
-<!-- Wall Image -->
-<img @ref="wallImage" id="wImage" src="images/WallSprite.png" alt="image" style="display:none;" />
-
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
 </div>
@@ -42,12 +39,6 @@
 
     // Background Image
     private ElementReference backgroundImage;
-
-    // Wall Image
-    private ElementReference wallImage;
-
-    // Top Wall
-    private Wall top = new Wall(1, new Point2D(0, 1000), new Point2D(1000, 1000));
 
     /// <summary>
     ///     Called after the page is rendered. 
@@ -94,9 +85,6 @@
         // HARD CODED NEED TO FIX
         // Draw background image
         await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
-
-        // HARD CODED NEED TO FIX
-        await context.DrawImageAsync(wallImage, 0, 0, 0, 0);
 
         // Finish batch drawing
         await context.EndBatchAsync();

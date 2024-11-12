@@ -3,35 +3,34 @@
 namespace GUI.Client.Models
 {
     /// <summary>
-    ///     TODO: XML COMMENT
+    ///     TODO: XML COMMENT.
     /// </summary>
-    public class Wall
+    public class Powerup
     {
         /// <summary>
-        ///     Unique ID of the wall.
+        ///     Unique ID for the powerup.
         /// </summary>
         [JsonInclude]
-        public int wall { get; set; }
+        public int power { get; set; }
 
         /// <summary>
-        ///     One endpoint of the wall.
+        ///     Location of the powerup.
         /// </summary>
         [JsonInclude]
-        public Point2D p1 { get; set; }
+        public Point2D loc { get; set; }
 
         /// <summary>
-        ///     The other endpoint of the wall.
+        ///     True if the powerup was collected (died) on this frame.
         /// </summary>
         [JsonInclude]
-        public Point2D p2 { get; set; }
+        public bool died { get; set; }
 
         /// <summary>
         ///     Default constructor for JSON deserialization.
         /// </summary>
-        public Wall()
+        public Powerup()
         {
-            p1 = new Point2D();
-            p2 = new Point2D();
+            loc = new Point2D();
         }
     }
 }
