@@ -10,8 +10,14 @@
         public Point2D p1;
 
         // A Point2D representing the other endpoint of the wall
-        public int p2;
+        public Point2D p2;
 
-        public 
+        public Wall(int id, Point2D start, Point2D end)
+        {
+            wall = id;
+            p1 = start;
+            p2 = end;
+        }
+
     }
 }
