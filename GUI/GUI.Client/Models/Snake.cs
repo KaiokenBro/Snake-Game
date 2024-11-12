@@ -3,70 +3,80 @@
 namespace GUI.Client.Models
 {
     /// <summary>
-    ///     TODO: XML COMMENT
+    ///     Represents a snake in the game, controlled by a player.
     /// </summary>
     public class Snake
     {
         /// <summary>
-        ///     Unique ID of the snake.
+        ///     Property that gets or sets the player's name.
         /// </summary>
         [JsonInclude]
-        public int snake { get; set; }
+        [JsonPropertyName("name")]
+        public string PlayerName { get; set; }
 
         /// <summary>
-        ///     Players name.
+        ///     Property that gets or sets the player's score, representing the number of powerups collected.
         /// </summary>
         [JsonInclude]
-        public string name { get; set; }
+        [JsonPropertyName("score")]
+        public int PlayerScore { get; set; }
 
         /// <summary>
-        ///     A list of Point2D representing the body segments.
+        ///     Property that gets or sets a value indicating whether the player joined on this frame.
         /// </summary>
         [JsonInclude]
-        public List<Point2D> body { get; set; }
+        [JsonPropertyName("join")]
+        public bool PlayerJoined { get; set; }
 
         /// <summary>
-        ///     Property for the Snakes orientation.
+        ///     Property that gets or sets a value indicating whether the player disconnected on this frame.
         /// </summary>
         [JsonInclude]
-        public Point2D dir { get; set; }
+        [JsonPropertyName("dc")]
+        public bool PlayerDisconnected { get; set; }
 
         /// <summary>
-        ///     Players score (Number of powerups collected).
+        ///     Property that gets or sets the unique ID of the snake.
         /// </summary>
         [JsonInclude]
-        public int score { get; set; }
+        [JsonPropertyName("snake")]
+        public int SnakeID { get; set; }
 
         /// <summary>
-        ///     True if the snake died on this frame.
+        ///     Property that gets or sets the body of the snake as a list of <see cref="Point2D"/> representing the segments.
         /// </summary>
         [JsonInclude]
-        public bool died { get; set; }
+        [JsonPropertyName("body")]
+        public List<Point2D> SnakeBody { get; set; }
 
         /// <summary>
-        ///     True if the snake is alive.
+        ///     Property that gets or sets the direction of the snake.
         /// </summary>
         [JsonInclude]
-        public bool alive { get; set; }
+        [JsonPropertyName("dir")]
+        public Point2D SnakeDirection { get; set; }
 
         /// <summary>
-        ///     True if the player disconnected on this frame.
+        ///     Property that gets or sets a value indicating whether the snake is alive.
         /// </summary>
         [JsonInclude]
-        public bool dc { get; set; }
+        [JsonPropertyName("alive")]
+        public bool SnakeAlive { get; set; }
 
         /// <summary>
-        ///     True if the player joined on this frame.
+        ///     Property that gets or sets a value indicating whether the snake died on this frame.
         /// </summary>
         [JsonInclude]
-        public bool join { get; set; }
+        [JsonPropertyName("died")]
+        public bool SnakeDied { get; set; }
 
         /// <summary>
-        ///     Default constructor for JSON deserialization.
+        ///     Initializes a new instance of the <see cref="Snake"/> class.
+        ///     Used for JSON deserialization.
         /// </summary>
         public Snake()
         {
-            body = new List<Point2D>();
+            SnakeBody = new List<Point2D>();
         }
     }
 }

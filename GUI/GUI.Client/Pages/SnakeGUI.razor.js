@@ -12,3 +12,4 @@ document.addEventListener('keydown', function (event)
     theInstance.invokeMethodAsync('HandleKeyPress', event.key);
 
 });
+

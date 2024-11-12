@@ -3,35 +3,39 @@
 namespace GUI.Client.Models
 {
     /// <summary>
-    ///     TODO: XML COMMENT
+    ///     Represents a wall in the game, with two endpoints defining its position.
     /// </summary>
     public class Wall
     {
         /// <summary>
-        ///     Unique ID of the wall.
+        ///     Property that gets or sets the unique ID of the wall.
         /// </summary>
         [JsonInclude]
-        public int wall { get; set; }
+        [JsonPropertyName("wall")]
+        public int WallID { get; set; }
 
         /// <summary>
-        ///     One endpoint of the wall.
+        ///     Property that gets or sets the first endpoint of the wall.
         /// </summary>
         [JsonInclude]
-        public Point2D p1 { get; set; }
+        [JsonPropertyName("p1")]
+        public Point2D P1 { get; set; }
 
         /// <summary>
-        ///     The other endpoint of the wall.
+        ///     Property that gets or sets the second endpoint of the wall.
         /// </summary>
         [JsonInclude]
-        public Point2D p2 { get; set; }
+        [JsonPropertyName("p2")]
+        public Point2D P2 { get; set; }
 
         /// <summary>
-        ///     Default constructor for JSON deserialization.
+        ///     Initializes a new instance of the <see cref="Wall"/> class.
+        ///     Used for JSON deserialization.
         /// </summary>
         public Wall()
         {
-            p1 = new Point2D();
-            p2 = new Point2D();
+            P1 = new Point2D();
+            P2 = new Point2D();
         }
     }
 }

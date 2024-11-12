@@ -3,85 +3,85 @@
 namespace GUI.Client.Models
 {
     /// <summary>
-    ///     TODO: XML COMMENT.
+    ///     Represents the game world containing snakes, walls, and powerups.
     /// </summary>
     public class World
     {
         /// <summary>
-        ///     Collection of all snakes, keyed by their IDs.
+        ///     Collection of all snakes in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Snake> snakes { get; set; }
+        public Dictionary<int, Snake> Snakes { get; set; }
 
         /// <summary>
-        ///     Collection of all walls, keyed by their IDs.
+        ///     Collection of all walls in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Wall> walls { get; set; }
+        public Dictionary<int, Wall> Walls { get; set; }
 
         /// <summary>
-        ///     Collection of all powerups, keyed by their IDs.
+        ///     Collection of all powerups in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Powerup> powerups { get; set; }
+        public Dictionary<int, Powerup> Powerups { get; set; }
 
         /// <summary>
-        ///     Size of the world (width and height).
+        ///     Property that gets or sets the size of the world (width and height).
         /// </summary>
-        public int worldSize { get; set; }
+        public int WorldSize { get; set; }
 
         /// <summary>
-        ///     Default constructor for initialization.
+        ///     Initializes a new instance of the <see cref="World"/> class with the specified world size.
         /// </summary>
-        /// <param name="worldSize"></param>
+        /// <param name="worldSize">The size of the world.</param>
         public World(int worldSize)
         {
-            this.worldSize = worldSize;
-            this.snakes = new Dictionary<int, Snake>();
-            this.walls = new Dictionary<int, Wall>();
-            this.powerups = new Dictionary<int, Powerup>();
+            this.WorldSize = worldSize;
+            this.Snakes = new Dictionary<int, Snake>();
+            this.Walls = new Dictionary<int, Wall>();
+            this.Powerups = new Dictionary<int, Powerup>();
         }
 
         /// <summary>
         ///     Method to add or update snake in the world.
         /// </summary>
-        /// <param name="snake"></param>
+        /// <param name="snake">The snake to add or update.</param>
         public void AddOrUpdateSnake(Snake snake)
         {
-            this.snakes[snake.snake] = snake;
-        }
-
-        /// <summary>
-        ///     Method to add or update wall in the world.
-        /// </summary>
-        /// <param name="wall"></param>
-        public void AddOrUpdateWall(Wall wall)
-        {
-            this.walls[wall.wall] = wall;
-        }
-
-        /// <summary>
-        ///     Method to add or update powerup in the world.
-        /// </summary>
-        /// <param name="powerup"></param>
-        public void AddOrUpdatePowerup(Powerup powerup)
-        {
-            this.powerups[powerup.power] = powerup;
+            this.Snakes[snake.SnakeID] = snake;
         }
 
         /// <summary>
         ///     Method to remove snake from the world.
         /// </summary>
-        /// <param name="snakeID"></param>
+        /// <param name="snakeID">The ID of the snake to remove.</param>
         public void RemoveSnake(int snakeID)
         {
-            this.snakes.Remove(snakeID);
+            this.Snakes.Remove(snakeID);
+        }
+
+        /// <summary>
+        ///     Method to add or update powerup in the world.
+        /// </summary>
+        /// <param name="powerup">The powerup to add or update.</param>
+        public void AddOrUpdatePowerup(Powerup powerup)
+        {
+            this.Powerups[powerup.PowerupID] = powerup;
         }
 
         /// <summary>
         ///     Method to remove powerup from the world.
         /// </summary>
-        /// <param name="powerupID"></param>
+        /// <param name="powerupID">The ID of the powerup to remove.</param>
         public void RemovePowerup(int powerupID)
         {
-            this.powerups.Remove(powerupID);
+            this.Powerups.Remove(powerupID);
+        }
+
+        /// <summary>
+        ///     Method to add or update wall in the world.
+        /// </summary>
+        /// <param name="wall">The wall to add or update.</param>
+        public void AddOrUpdateWall(Wall wall)
+        {
+            this.Walls[wall.WallID] = wall;
         }
     }
 }
