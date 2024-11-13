@@ -6,7 +6,8 @@
 @using System.Numerics
 @using System.Diagnostics
 @using System.Text.Json
-@using CS3500.Networking
+@using GUI.Client.Controllers
+@using GUI.Client.Models
 @inject IJSRuntime JsRuntime;
 
 <PageTitle>Snake</PageTitle>
@@ -24,7 +25,7 @@
         <label for="ServerPort">Port: </label>
         <input id="ServerPort" type="number" @bind="ServerPort" disabled="@network.IsConnected" />
 
-        @if (network.IsConnected)
+        @if (IsConnected)
         {
             <button class="btn btn-primary" @onclick="DisconnectFromServer">Disconnect</button>
         }
@@ -44,79 +45,16 @@
 @code
 {
 
-    /// <summary>
-    ///     Default server name.
-    /// </summary>
+    // Connection and Player Info
     private string ServerNameOrAddress = "localhost";
-
-    /// <summary>
-    ///     Default server port.
-    /// </summary>
     private int ServerPort = 11000;
-
-    /// <summary>
-    ///     The NetworkConnection object representing a connection with the server.
-    /// </summary>
-    private NetworkConnection network = new NetworkConnection();
-
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
     private string PlayerName { get; set; } = string.Empty;
 
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
+    // Canvas and Network
     private BECanvasComponent canvasReference = null!;
-
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
     private Canvas2DContext context = null!;
-
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
     private IJSObjectReference jsModule = null!;
 
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
-    private void ConnectToServer()
-    {
-        if (!network.IsConnected)
-        {
-            try
-            {
-                network.Connect(ServerNameOrAddress, ServerPort);
-                Console.WriteLine($"Connected to {ServerNameOrAddress}:{ServerPort} as {PlayerName}");
-                // Send initial player name or any necessary data to the server
-                network.Send(PlayerName);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to connect: {ex.Message}");
-            }
-        }
-    }
-
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
-    private void DisconnectFromServer()
-    {
-        if (network.IsConnected)
-        {
-            network.Disconnect();
-            Console.WriteLine("Disconnected from server.");
-        }
-    }
-
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
-    /// <param name="firstRender"></param>
-    /// <returns></returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -134,19 +72,10 @@
         }
     }
 
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
-    /// <param name="key"></param>
     [JSInvokable]
     public void HandleKeyPress(string key)
     {
-        // TODO: Once the client is connected and the handshake is complete,
-        //       invoke some controller method to send the appropriate command to the server
-
-
-        // TODO: Remove this, which is just here to show you what the 'key' string is for whatever key you pressed
-        Debug.WriteLine("key pressed: " + key);
+        networkController.HandleUserInput(key);
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     Represents a powerup in the game, which can be collected by players.
     /// </summary>
@@ -37,4 +38,5 @@ namespace GUI.Client.Models
             PowerupLocation = new Point2D();
         }
     }
+
 }
