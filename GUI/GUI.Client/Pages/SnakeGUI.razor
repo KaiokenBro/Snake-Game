@@ -25,7 +25,7 @@
         <label for="ServerPort">Port: </label>
         <input id="ServerPort" type="number" @bind="ServerPort" disabled="@network.IsConnected" />
 
-        @if (IsConnected)
+        @if (network.IsConnected)
         {
             <button class="btn btn-primary" @onclick="DisconnectFromServer">Disconnect</button>
         }
@@ -54,6 +54,35 @@
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
     private IJSObjectReference jsModule = null!;
+    private NetworkConnection network = new NetworkConnection();
+
+
+    private NetworkController networkController = new NetworkController();
+
+    private async Task ConnectToServer()
+    {
+        if (!network.IsConnected)
+        {
+            try
+            {
+                network.Connect(ServerNameOrAddress, ServerPort);
+                network.Send(PlayerName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to connect: {ex.Message}");
+            }
+        }
+    }
+
+    private void DisconnectFromServer()
+    {
+        if (network.IsConnected)
+        {
+            network.Disconnect();
+            Console.WriteLine("Disconnected from server.");
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -72,10 +101,10 @@
         }
     }
 
-    [JSInvokable]
-    public void HandleKeyPress(string key)
-    {
-        networkController.HandleUserInput(key);
-    }
+    //[JSInvokable]
+    //public void HandleKeyPress(string key)
+    //{
+        //networkController.HandleUserInput(key);
+    //}
 
 }
