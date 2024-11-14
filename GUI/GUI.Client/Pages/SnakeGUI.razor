@@ -42,22 +42,19 @@
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
 </div>
 
+<!-- Connection -->
 @code
 {
 
-    // Connection and Player Info
+    // Connection
     private string ServerNameOrAddress = "localhost";
     private int ServerPort = 11000;
+
+    // Player
     private string PlayerName { get; set; } = string.Empty;
 
-    // Canvas and Network
-    private BECanvasComponent canvasReference = null!;
-    private Canvas2DContext context = null!;
-    private IJSObjectReference jsModule = null!;
-    private NetworkConnection network = new NetworkConnection();
-
-
-    private NetworkController networkController = new NetworkController();
+    // Network
+    private NetworkController networkController;
 
     private async Task ConnectToServer()
     {
@@ -67,6 +64,7 @@
             {
                 network.Connect(ServerNameOrAddress, ServerPort);
                 network.Send(PlayerName);
+                networkController = new NetworkController(network);
             }
             catch (Exception ex)
             {
@@ -84,6 +82,62 @@
         }
     }
 
+}
+
+<!-- User Input -->
+@code
+{
+
+    [JSInvokable]
+    public void HandleKeyPress(string key)
+    {
+
+        // Only works if IsConnected
+        if (!network.IsConnected)
+        {
+            return;
+        }
+
+        // Map the key to a movement direction
+        string direction = key switch
+        {
+            "w" => "up",
+            "a" => "left",
+            "s" => "down",
+            "d" => "right"
+        };
+
+        // If the direction is valid, send it to the NetworkController
+        if (direction != null && networkController != null)
+        {
+            // Create a ControlCommand object with the direction
+            ControlCommand command = new ControlCommand(direction);
+
+            // Send the command to the server through NetworkController
+            networkController.SendCommand(command);
+        }
+    }
+
+}
+
+<!-- Rendering Game State -->
+@code
+{
+
+    // Canvas
+    private BECanvasComponent canvasReference = null!;
+    private Canvas2DContext context = null!;
+    private IJSObjectReference jsModule = null!;
+    private NetworkConnection network = new NetworkConnection();
+
+    private ElementReference backgroundImage;
+
+    // World
+    private World TheWorld = new(WorldSize);
+    private const int ViewWidth = 1000;
+    private const int ViewHeight = 1000;
+    private const int WorldSize = 1000;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -92,19 +146,49 @@
             context = await canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
 
-            // TODO: Start the game loop
-
-            // in the meantime, draw something to initialize the canvas
-            // you may want to remove this after you are drawing something
-            await context.SetFillStyleAsync("lightblue");
-            await context.FillRectAsync(0, 0, 1000, 1000);
+            // Start the game loop
+            //await GameLoop();
         }
     }
 
-    //[JSInvokable]
-    //public void HandleKeyPress(string key)
-    //{
-        //networkController.HandleUserInput(key);
-    //}
+    private async Task GameLoop()
+    {
+        while (true)
+        {
+            // Create a snapshot of the current world state to avoid modifying the shared resource.
+            World snapshot = new World(WorldSize);
+
+            await DrawFrame(snapshot);
+
+            Thread.Sleep(20);
+        }
+    }
+
+    private async Task DrawFrame(World snapshot)
+    {
+
+        // batch the drawing calls for better performance
+        await context.BeginBatchAsync();
+
+        await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
+
+        // Draw each snake, powerup, and wall
+
+    }
+
+    private async Task DrawSnake(Snake snake)
+    {
+
+    }
+
+    private async Task DrawPowerup(Powerup powerup)
+    {
+
+    }
+
+    private async Task DrawWall(Wall wall)
+    {
+
+    }
 
 }

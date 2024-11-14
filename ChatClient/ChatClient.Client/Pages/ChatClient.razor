@@ -37,13 +37,17 @@
     <div class="input-row">
         <div class="input-col">
             <div id="Messages" class="container @grayedOut">
-                @foreach ( var line in AllMessages )
-                {
-                    <span class="themClass">
-                        @line
-                    </span>
+                @{
+                    lock(AllMessages)
+                    {
+                        foreach (var line in AllMessages)
+                        {
+                            <span class="themClass">
+                                @line
+                            </span>
+                        }
+                    }
                 }
-
             </div>
         </div>
     </div>
@@ -114,7 +118,11 @@
                         var message = network.ReadLine();
 
                         message = $"{DateTime.Now:HH:mm tt} - {message}";
-                        AllMessages.Insert( 0, message );
+
+                        lock(AllMessages)
+                        {
+                            AllMessages.Insert(0, message);
+                        }
 
                         // Since we are changing the UI from another thread, we need to 
                         // use the dispatcher for StateHasChanged
