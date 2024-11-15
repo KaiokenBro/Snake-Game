@@ -11,14 +11,12 @@ namespace GUI.Client.Models
         ///     Property that gets or sets the X-coordinate of the point.
         /// </summary>
         [JsonInclude]
-        [JsonPropertyName("x")]
         public int X { get; set; }
 
         /// <summary>
         ///     Property that gets or sets the Y-coordinate of the point.
         /// </summary>
         [JsonInclude]
-        [JsonPropertyName("y")]
         public int Y { get; set; }
 
         /// <summary>

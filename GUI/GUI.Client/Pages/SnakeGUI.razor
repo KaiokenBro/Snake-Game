@@ -17,15 +17,15 @@
     <div class="input-row">
 
         <label for="PlayerName">Player Name: </label>
-        <input id="PlayerName" type="text" @bind="PlayerName" disabled="@network.IsConnected" />
+        <input id="PlayerName" type="text" @bind="PlayerName" disabled="@connection.IsConnected" />
 
         <label for="ServerNameOrAddress">Server Address: </label>
-        <input id="ServerNameOrAddress" type="text" @bind="ServerNameOrAddress" disabled="@network.IsConnected" />
+        <input id="ServerNameOrAddress" type="text" @bind="ServerNameOrAddress" disabled="@connection.IsConnected" />
 
         <label for="ServerPort">Port: </label>
-        <input id="ServerPort" type="number" @bind="ServerPort" disabled="@network.IsConnected" />
+        <input id="ServerPort" type="number" @bind="ServerPort" disabled="@connection.IsConnected" />
 
-        @if (network.IsConnected)
+        @if (connection.IsConnected)
         {
             <button class="btn btn-primary" @onclick="DisconnectFromServer">Disconnect</button>
         }
@@ -37,6 +37,18 @@
     </div>
 </div>
 
+<br />
+
+<!-- Background Image -->
+<div>
+    <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
+</div>
+
+<!-- Wall Image -->
+<div>
+    <img @ref="wallImage" id="wImage" src="images/WallSprite.png" alt="image" style="display:none;" />
+</div>
+
 <!-- Canvas for Game Display -->
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
@@ -46,39 +58,80 @@
 @code
 {
 
-    // Connection
+    // Server Name
     private string ServerNameOrAddress = "localhost";
+
+    // Port
     private int ServerPort = 11000;
 
-    // Player
+    // Create a new NetworkConnection instance
+    private NetworkConnection connection = new NetworkConnection();
+
+    // Player name
     private string PlayerName { get; set; } = string.Empty;
 
-    // Network
+    // Controller
     private NetworkController networkController;
 
-    private async Task ConnectToServer()
+    /// <summary>
+    ///     Triggered on Connect button.
+    /// </summary>
+    private async void ConnectToServer()
     {
-        if (!network.IsConnected)
+        if (!connection.IsConnected)
         {
             try
             {
-                network.Connect(ServerNameOrAddress, ServerPort);
-                network.Send(PlayerName);
-                networkController = new NetworkController(network);
+                // Establish connection to server
+                connection.Connect(ServerNameOrAddress, ServerPort);
+
+                // Send PlayerName to server
+                connection.Send(PlayerName);
+
+                // Create a NetworkController using the NetworkConnection instance
+                networkController = new NetworkController(connection);
+
+                // Subscribe to the DataReceived event to handle incoming data
+                networkController.DataReceived += networkController.HandleServerData;
+
+                // Start the network loop to continuously receive data
+                await NetworkLoop();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Failed to connect: {ex.Message}");
+                throw;
             }
         }
     }
 
+    /// <summary>
+    ///     Triggered on Disconnect button.
+    /// </summary>
     private void DisconnectFromServer()
     {
-        if (network.IsConnected)
+        if (connection.IsConnected)
         {
-            network.Disconnect();
-            Console.WriteLine("Disconnected from server.");
+            connection.Disconnect();
+        }
+    }
+
+    /// <summary>
+    ///     TODO: XML COMMENT.
+    /// </summary>
+    /// <returns></returns>
+    private async Task NetworkLoop()
+    {
+        while (connection.IsConnected)
+        {
+            try
+            {
+                // Start receiving data from the server
+                await networkController.ReceiveFromServerAsync();
+            }
+            catch (Exception)
+            {
+                break;
+            }
         }
     }
 
@@ -88,34 +141,20 @@
 @code
 {
 
+    /// <summary>
+    ///     TODO: XML COMMENT.
+    /// </summary>
+    /// <param name="key"></param>
     [JSInvokable]
     public void HandleKeyPress(string key)
     {
-
         // Only works if IsConnected
-        if (!network.IsConnected)
+        if (!connection.IsConnected)
         {
             return;
         }
 
-        // Map the key to a movement direction
-        string direction = key switch
-        {
-            "w" => "up",
-            "a" => "left",
-            "s" => "down",
-            "d" => "right"
-        };
-
-        // If the direction is valid, send it to the NetworkController
-        if (direction != null && networkController != null)
-        {
-            // Create a ControlCommand object with the direction
-            ControlCommand command = new ControlCommand(direction);
-
-            // Send the command to the server through NetworkController
-            networkController.SendCommand(command);
-        }
+        networkController.KeyPressCommand(key);
     }
 
 }
@@ -124,71 +163,149 @@
 @code
 {
 
-    // Canvas
+    /// <summary>
+    ///     C# reference to the html element for the drawing canvas.
+    /// </summary>
     private BECanvasComponent canvasReference = null!;
-    private Canvas2DContext context = null!;
-    private IJSObjectReference jsModule = null!;
-    private NetworkConnection network = new NetworkConnection();
 
+    /// <summary>
+    ///     Object attached to the canvas that has all the drawing methods.
+    /// </summary>
+    private Canvas2DContext context = null!;
+
+    /// <summary>
+    ///     C# reference to the html element for the background image.
+    /// </summary>
     private ElementReference backgroundImage;
 
-    // World
-    private World TheWorld = new(WorldSize);
-    private const int ViewWidth = 1000;
-    private const int ViewHeight = 1000;
-    private const int WorldSize = 1000;
+    private ElementReference wallImage;
 
+    /// <summary>
+    ///     Reference to Javascript .
+    /// </summary>
+    private IJSObjectReference jsModule = null!;
+
+    /// <summary>
+    ///     Width of the display canvas.
+    /// </summary>
+    private const int ViewWidth = 1000;
+
+    /// <summary>
+    ///     Height of the display canvas.
+    /// </summary>
+    private const int ViewHeight = 1000;
+
+    /// <summary>
+    ///     The size of one side of the square world.
+    /// </summary>
+    private int WorldSize;
+
+    /// <summary>
+    ///     The (M)odel part of MVC, represents the objects in the game.
+    /// </summary>
+    private World TheWorld;
+
+    /// <summary>
+    ///     Called automatically after the page is rendered.
+    ///     We use this to know when the first page load-
+    ///     has occurred so we can initialize various data and start the server and drawing loops.
+    /// </summary>
+    /// <param name="firstRender"></param>
+    /// <returns></returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
-            context = await canvasReference.CreateCanvas2DAsync();
+            this.context = await this.canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
+        }
 
+        else
+        {
             // Start the game loop
-            //await GameLoop();
+            // Dont want to await because OnAfterRenderAsync would never return
+            GameLoopAsync();
         }
     }
 
-    private async Task GameLoop()
+    /// <summary>
+    ///     Renders the view once every 20 milliseconds (50 frames/second)
+    /// </summary>
+    /// <returns></returns>
+    private async Task GameLoopAsync()
     {
         while (true)
         {
             // Create a snapshot of the current world state to avoid modifying the shared resource.
-            World snapshot = new World(WorldSize);
+            World snapshot = new World(TheWorld);
 
-            await DrawFrame(snapshot);
+            // Draw the frame
+            await DrawFrameAsync(snapshot);
 
+            // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
         }
     }
 
-    private async Task DrawFrame(World snapshot)
+    /// <summary>
+    ///     Draws one frame of the game.
+    /// </summary>
+    /// <returns></returns>
+    private async Task DrawFrameAsync(World snapshot)
     {
-
-        // batch the drawing calls for better performance
+        // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
 
+        // Draw background image
         await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
 
-        // Draw each snake, powerup, and wall
+        // Draw the Walls
+        foreach (Wall wall in snapshot.Walls.Values)
+        {
+            // Calculate wall segment positions based on p1 and p2
+            // Each wall is defined by two points, P1 and P2
+            int x1 = wall.P1.X;
+            int y1 = wall.P1.Y;
+            int x2 = wall.P2.X;
+            int y2 = wall.P2.Y;
 
-    }
+            // Determine if the wall segment is horizontal or vertical
+            if (x1 == x2) // Vertical wall
+            {
+                // Determine the length of the wall
+                int length = Math.Abs(y2 - y1);
 
-    private async Task DrawSnake(Snake snake)
-    {
+                // Draw the wall sprite from P1 to P2
+                for (int i = 0; i <= length; i += 50) // Assuming each sprite segment is 50x50
+                {
+                    int drawY = Math.Min(y1, y2) + i;
+                    await context.DrawImageAsync(wallImage, x1 - 25, drawY - 25, 50, 50);
+                }
+            }
+            else if (y1 == y2) // Horizontal wall
+            {
+                // Determine the length of the wall
+                int length = Math.Abs(x2 - x1);
 
-    }
+                // Draw the wall sprite from P1 to P2
+                for (int i = 0; i <= length; i += 50) // Assuming each sprite segment is 50x50
+                {
+                    int drawX = Math.Min(x1, x2) + i;
+                    await context.DrawImageAsync(wallImage, drawX - 25, y1 - 25, 50, 50);
+                }
+            }
+        }
 
-    private async Task DrawPowerup(Powerup powerup)
-    {
+        // Draw the Snakes
 
-    }
+        // Draw the Powerups
 
-    private async Task DrawWall(Wall wall)
-    {
+        // Finish batch drawing
+        await context.EndBatchAsync();
 
+        // Must do this whenever something changes the way it needs to be displayed
+        StateHasChanged();
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 
 namespace GUI.Client.Models
 {
@@ -37,6 +38,17 @@ namespace GUI.Client.Models
             this.Snakes = new Dictionary<int, Snake>();
             this.Walls = new Dictionary<int, Wall>();
             this.Powerups = new Dictionary<int, Powerup>();
+        }
+
+        /// <summary>
+        ///     Shallow copy constructor.
+        /// </summary>
+        /// <param name="world"></param>
+        public World(World world)
+        {
+            Snakes = new(world.Snakes);
+            Powerups = new(world.Powerups);
+            WorldSize = world.WorldSize;
         }
 
         /// <summary>
