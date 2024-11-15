@@ -91,7 +91,10 @@
                 // Create a NetworkController using the NetworkConnection instance
                 networkController = new NetworkController(connection);
 
+                //Get Worldsize and player id from initial methods
+
                 // Subscribe to the DataReceived event to handle incoming data
+                // Feed Handle method with the world to be used for drawing.
                 networkController.DataReceived += networkController.HandleServerData;
 
                 // Start the network loop to continuously receive data
@@ -238,6 +241,7 @@
         while (true)
         {
             // Create a snapshot of the current world state to avoid modifying the shared resource.
+            // After network controller updates the world on its end, it will reflect with the passed in world.
             World snapshot = new World(TheWorld);
 
             // Draw the frame
