@@ -86,16 +86,15 @@
             {
                 // Establish connection to server
                 connection.Connect(ServerNameOrAddress, ServerPort);
+                Console.WriteLine("Connected To Server!");
 
                 // Send PlayerName to server
                 connection.Send(PlayerName);
+                Console.WriteLine("Sent PlayerName To Server!");
 
                 // Create a NetworkController using the NetworkConnection instance
                 networkController = new NetworkController(connection);
-
-                // Subscribe to the DataReceived event to handle incoming data
-                // Feed Handle method with the world to be used for drawing.
-                networkController.DataReceived += networkController.HandleServerData;
+                Console.WriteLine("Created new NetworkController!");
 
                 // Start the network loop to continuously receive data
                 await NetworkLoop();
@@ -117,6 +116,7 @@
         if (connection.IsConnected)
         {
             connection.Disconnect();
+            Console.WriteLine("Disconnected From Server!");
         }
     }
 
@@ -127,7 +127,6 @@
     private async Task NetworkLoop()
     {
         Console.WriteLine("NetworkLoop()");
-
 
         while (connection.IsConnected)
         {

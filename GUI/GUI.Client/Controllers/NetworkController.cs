@@ -50,12 +50,7 @@ namespace GUI.Client.Controllers
                     // Asynchronously receive data from the network
                     string message = await Task.Run(() => network.ReadLine());
 
-                    if (!string.IsNullOrEmpty(message))
-                    {
-                        // Trigger the DataReceived event to notify subscribers of the new data
-                        DataReceived?.Invoke(message);
-                    }
-
+                    HandleServerData(message);
                 }
                 catch (Exception)
                 {
@@ -78,6 +73,7 @@ namespace GUI.Client.Controllers
                     {
                         playerID = parsedPlayerID;
                         receivedID = true;
+                        Console.WriteLine("PlayerID Received!");
                     }
                 }
                 else if (!receivedSize)
@@ -87,16 +83,21 @@ namespace GUI.Client.Controllers
                     {
                         worldSize = parsedWorldSize;
                         receivedSize = true;
+                        Console.WriteLine("worldSize Received!");
 
                         // Now that we have the world size, create a new World instance
                         theWorld = new World(worldSize);
+                        Console.WriteLine("World Created!");
 
                         // Create a new Snake for the player and set its ID
                         Snake userSnake = new Snake();
+                        Console.WriteLine("Snake Created!");
                         userSnake.SnakeID = playerID;
+                        Console.WriteLine("SnakeID Assigned!");
 
                         // Add the Snake to the world
                         theWorld.Snakes[playerID] = userSnake;
+                        Console.WriteLine("Snake Added To World!");
                     }
                 }
             }
@@ -114,6 +115,7 @@ namespace GUI.Client.Controllers
             // Deserialize the JSON message into a dictionary of objects
             var gameData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonMessage);
 
+            // If its a wall
             if (gameData.ContainsKey("wall"))
             {
                 // Extract wall ID
@@ -135,11 +137,13 @@ namespace GUI.Client.Controllers
                 // Add or update the wall in theWorld.Walls
                 theWorld.Walls[wallID] = wall;
 
-                // Print statements for debugging
-                Console.WriteLine($"Wall ID: {wall.WallID}");
-                Console.WriteLine($"P1: X={wall.P1.X}, Y={wall.P1.Y}");
-                Console.WriteLine($"P2: X={wall.P2.X}, Y={wall.P2.Y}");
+                Console.WriteLine($"Wall {wallID} created!");
             }
+
+            // If its a snake
+
+            // If its a powerup
+
         }
 
         /// <summary>
