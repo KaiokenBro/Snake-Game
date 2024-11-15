@@ -32,10 +32,14 @@ namespace GUI.Client.Models
         ///     Initializes a new instance of the <see cref="Wall"/> class.
         ///     Used for JSON deserialization.
         /// </summary>
-        public Wall()
+        public Wall(int wallID, Point2D p1, Point2D p2)
         {
-            P1 = new Point2D();
-            P2 = new Point2D();
+            WallID = wallID;
+            P1 = p1;
+            P2 = p2;
         }
+
+        // Default Constructor for deserialization
+        public Wall() { }
     }
 }

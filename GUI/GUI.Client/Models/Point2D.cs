@@ -35,7 +35,6 @@ namespace GUI.Client.Models
         ///     Used for JSON deserialization.
         /// </summary>
         public Point2D()
-        {
-        }
+        { }
     }
 }

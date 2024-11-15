@@ -78,6 +78,8 @@
     /// </summary>
     private async void ConnectToServer()
     {
+        Console.WriteLine("ConnectToServer()");
+
         if (!connection.IsConnected)
         {
             try
@@ -90,8 +92,6 @@
 
                 // Create a NetworkController using the NetworkConnection instance
                 networkController = new NetworkController(connection);
-
-                //Get Worldsize and player id from initial methods
 
                 // Subscribe to the DataReceived event to handle incoming data
                 // Feed Handle method with the world to be used for drawing.
@@ -112,6 +112,8 @@
     /// </summary>
     private void DisconnectFromServer()
     {
+        Console.WriteLine("DisconnectFromServer()");
+
         if (connection.IsConnected)
         {
             connection.Disconnect();
@@ -124,6 +126,9 @@
     /// <returns></returns>
     private async Task NetworkLoop()
     {
+        Console.WriteLine("NetworkLoop()");
+
+
         while (connection.IsConnected)
         {
             try
@@ -198,15 +203,7 @@
     /// </summary>
     private const int ViewHeight = 1000;
 
-    /// <summary>
-    ///     The size of one side of the square world.
-    /// </summary>
-    private int WorldSize;
-
-    /// <summary>
-    ///     The (M)odel part of MVC, represents the objects in the game.
-    /// </summary>
-    private World TheWorld;
+    private World copyWorld;
 
     /// <summary>
     ///     Called automatically after the page is rendered.
@@ -240,12 +237,8 @@
     {
         while (true)
         {
-            // Create a snapshot of the current world state to avoid modifying the shared resource.
-            // After network controller updates the world on its end, it will reflect with the passed in world.
-            World snapshot = new World(TheWorld);
-
             // Draw the frame
-            await DrawFrameAsync(snapshot);
+            await DrawFrameAsync();
 
             // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
@@ -256,7 +249,7 @@
     ///     Draws one frame of the game.
     /// </summary>
     /// <returns></returns>
-    private async Task DrawFrameAsync(World snapshot)
+    private async Task DrawFrameAsync()
     {
         // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
@@ -264,46 +257,11 @@
         // Draw background image
         await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
 
-        // Draw the Walls
-        foreach (Wall wall in snapshot.Walls.Values)
-        {
-            // Calculate wall segment positions based on p1 and p2
-            // Each wall is defined by two points, P1 and P2
-            int x1 = wall.P1.X;
-            int y1 = wall.P1.Y;
-            int x2 = wall.P2.X;
-            int y2 = wall.P2.Y;
+        // Draw Walls
 
-            // Determine if the wall segment is horizontal or vertical
-            if (x1 == x2) // Vertical wall
-            {
-                // Determine the length of the wall
-                int length = Math.Abs(y2 - y1);
+        // Draw Powerups
 
-                // Draw the wall sprite from P1 to P2
-                for (int i = 0; i <= length; i += 50) // Assuming each sprite segment is 50x50
-                {
-                    int drawY = Math.Min(y1, y2) + i;
-                    await context.DrawImageAsync(wallImage, x1 - 25, drawY - 25, 50, 50);
-                }
-            }
-            else if (y1 == y2) // Horizontal wall
-            {
-                // Determine the length of the wall
-                int length = Math.Abs(x2 - x1);
-
-                // Draw the wall sprite from P1 to P2
-                for (int i = 0; i <= length; i += 50) // Assuming each sprite segment is 50x50
-                {
-                    int drawX = Math.Min(x1, x2) + i;
-                    await context.DrawImageAsync(wallImage, drawX - 25, y1 - 25, 50, 50);
-                }
-            }
-        }
-
-        // Draw the Snakes
-
-        // Draw the Powerups
+        // Draw Snakes
 
         // Finish batch drawing
         await context.EndBatchAsync();

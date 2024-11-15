@@ -19,18 +19,18 @@ namespace GUI.Client.Controllers
         /// </summary>
         public event Action<string> DataReceived;
 
-        private bool receivedIdAndWorldSize = false;
-        private int? playerId = null;
-        private int worldSize = 0;
-
-        private Snake userSnake;
-
         private World theWorld;
+
+        private bool receivedID = false;
+        private bool receivedSize = false;
+
+        private int worldSize;
+        private int playerID;
 
         /// <summary>
         ///     TODO: XML COMMENT.
         /// </summary>
-        /// <param name="network"></param>
+        /// <param name="connection"></param>
         public NetworkController(NetworkConnection connection)
         {
             this.network = connection;
@@ -41,6 +41,8 @@ namespace GUI.Client.Controllers
         /// </summary>
         public async Task ReceiveFromServerAsync()
         {
+            Console.WriteLine("ReceiveFromServerAsync()");
+
             while (network.IsConnected)
             {
                 try
@@ -64,43 +66,80 @@ namespace GUI.Client.Controllers
 
         public void HandleServerData(string message)
         {
+            Console.WriteLine("HandleServerData()");
 
-            // If we haven't received the ID and world size yet
-            if (!receivedIdAndWorldSize)
+            // Handle first 2 messages from server, PlayerID and WorldSize
+            if (!receivedID || !receivedSize)
             {
-                // First message should be the player ID
-                if (playerId == null)
+                if (!receivedID)
                 {
-                    if (int.TryParse(message, out int id))
+                    // Parse playerID from the message string
+                    if (int.TryParse(message, out int parsedPlayerID))
                     {
-                        userSnake = new Snake();
-                        userSnake.SnakeID = id;
-                        Console.WriteLine("SHIT");
+                        playerID = parsedPlayerID;
+                        receivedID = true;
                     }
                 }
-                // Second message should be the world size
-                else if (worldSize == 0)
+                else if (!receivedSize)
                 {
-                    if (int.TryParse(message, out int size))
+                    // Parse worldSize from the message string
+                    if (int.TryParse(message, out int parsedWorldSize))
                     {
-                        worldSize = size;
+                        worldSize = parsedWorldSize;
+                        receivedSize = true;
+
+                        // Now that we have the world size, create a new World instance
                         theWorld = new World(worldSize);
-                        receivedIdAndWorldSize = true;
+
+                        // Create a new Snake for the player and set its ID
+                        Snake userSnake = new Snake();
+                        userSnake.SnakeID = playerID;
+
+                        // Add the Snake to the world
+                        theWorld.Snakes[playerID] = userSnake;
                     }
                 }
             }
-
+            // Handle remaining JSON messages
             else
             {
                 ParseJsonData(message);
             }
-
         }
 
         private void ParseJsonData(string jsonMessage)
         {
-            Wall wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
-            theWorld.AddOrUpdateWall(wall);
+            Console.WriteLine("ParseJsonData()");
+
+            // Deserialize the JSON message into a dictionary of objects
+            var gameData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonMessage);
+
+            if (gameData.ContainsKey("wall"))
+            {
+                // Extract wall ID
+                int wallID = gameData["wall"].GetInt32();
+
+                // Extract p1 and p2 coordinates
+                int p1X = gameData["p1"].GetProperty("X").GetInt32();
+                int p1Y = gameData["p1"].GetProperty("Y").GetInt32();
+                int p2X = gameData["p2"].GetProperty("X").GetInt32();
+                int p2Y = gameData["p2"].GetProperty("Y").GetInt32();
+
+                // Create Point2D objects for p1 and p2
+                Point2D p1 = new Point2D(p1X, p1Y);
+                Point2D p2 = new Point2D(p2X, p2Y);
+
+                // Create the Wall object
+                Wall wall = new Wall(wallID, p1, p2);
+
+                // Add or update the wall in theWorld.Walls
+                theWorld.Walls[wallID] = wall;
+
+                // Print statements for debugging
+                Console.WriteLine($"Wall ID: {wall.WallID}");
+                Console.WriteLine($"P1: X={wall.P1.X}, Y={wall.P1.Y}");
+                Console.WriteLine($"P2: X={wall.P2.X}, Y={wall.P2.Y}");
+            }
         }
 
         /// <summary>

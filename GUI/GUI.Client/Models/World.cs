@@ -11,8 +11,8 @@ namespace GUI.Client.Models
         /// <summary>
         ///     Collection of all snakes in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Snake> 
-Snakes { get; set; }
+        public Dictionary<int, Snake> Snakes { get; set; }
+
         /// <summary>
         ///     Collection of all walls in the world, keyed by their unique IDs.
         /// </summary>
