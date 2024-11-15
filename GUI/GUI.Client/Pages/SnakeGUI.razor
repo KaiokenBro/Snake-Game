@@ -16,8 +16,8 @@
 <div id="ConnectionInputs">
     <div class="input-row">
 
-        <label for="PlayerName">Player Name: </label>
-        <input id="PlayerName" type="text" @bind="PlayerName" disabled="@connection.IsConnected" />
+        <label for="playerName">Player Name: </label>
+        <input id="playerName" type="text" @bind="playerName" disabled="@connection.IsConnected" />
 
         <label for="ServerNameOrAddress">Server Address: </label>
         <input id="ServerNameOrAddress" type="text" @bind="ServerNameOrAddress" disabled="@connection.IsConnected" />
@@ -68,7 +68,7 @@
     private NetworkConnection connection = new NetworkConnection();
 
     // Player name
-    private string PlayerName { get; set; } = string.Empty;
+    private string playerName;
 
     // Controller
     private NetworkController networkController;
@@ -89,15 +89,15 @@
                 Console.WriteLine("Connected To Server!");
 
                 // Send PlayerName to server
-                connection.Send(PlayerName);
-                Console.WriteLine("Sent PlayerName To Server!");
+                connection.Send(playerName);
+                Console.WriteLine("Sent PlayerName To Server! " + playerName);
 
                 // Create a NetworkController using the NetworkConnection instance
-                networkController = new NetworkController(connection);
+                networkController = new NetworkController(connection, playerName);
                 Console.WriteLine("Created new NetworkController!");
 
                 // Start the network loop to continuously receive data
-                await NetworkLoop();
+                await NetworkLoop()
             }
             catch (Exception)
             {

@@ -14,11 +14,6 @@ namespace GUI.Client.Controllers
         /// </summary>
         private NetworkConnection network;
 
-        /// <summary>
-        /// Event triggered when data is received from the server.
-        /// </summary>
-        public event Action<string> DataReceived;
-
         private World theWorld;
 
         private bool receivedID = false;
@@ -26,14 +21,12 @@ namespace GUI.Client.Controllers
 
         private int worldSize;
         private int playerID;
+        private string playerName;
 
-        /// <summary>
-        ///     TODO: XML COMMENT.
-        /// </summary>
-        /// <param name="connection"></param>
-        public NetworkController(NetworkConnection connection)
+        public NetworkController(NetworkConnection connection, string playerName)
         {
             this.network = connection;
+            this.playerName = playerName;
         }
 
         /// <summary>
@@ -89,11 +82,17 @@ namespace GUI.Client.Controllers
                         theWorld = new World(worldSize);
                         Console.WriteLine("World Created!");
 
-                        // Create a new Snake for the player and set its ID
+                        // Create a new Snake for the player
                         Snake userSnake = new Snake();
                         Console.WriteLine("Snake Created!");
+
+                        // Set new snakes ID
                         userSnake.SnakeID = playerID;
                         Console.WriteLine("SnakeID Assigned!");
+
+                        // Set snakes player name
+                        userSnake.PlayerName = playerName;
+                        Console.WriteLine("PlayerName Assigned!");
 
                         // Add the Snake to the world
                         theWorld.Snakes[playerID] = userSnake;

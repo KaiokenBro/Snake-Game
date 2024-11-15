@@ -46,6 +46,7 @@ namespace GUI.Client.Models
         /// <param name="world"></param>
         public World(World world)
         {
+            Walls = new(world.Walls);
             Snakes = new(world.Snakes);
             Powerups = new(world.Powerups);
             WorldSize = world.WorldSize;
