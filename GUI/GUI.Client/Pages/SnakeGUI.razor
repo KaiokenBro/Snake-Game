@@ -78,15 +78,16 @@
     /// </summary>
     private async void ConnectToServer()
     {
-        Console.WriteLine("ConnectToServer()");
+        Console.WriteLine("ConnectToServer called");
 
         if (!connection.IsConnected)
         {
             try
             {
+                Console.WriteLine("Attempting to connect...");
                 // Establish connection to server
                 connection.Connect(ServerNameOrAddress, ServerPort);
-                Console.WriteLine("Connected To Server!");
+                Console.WriteLine("Connected to the server.");
 
                 // Send PlayerName to server
                 connection.Send(playerName);
@@ -98,9 +99,11 @@
 
                 // Start the network loop to continuously receive data
                 await NetworkLoop();
+                Console.WriteLine("Started NetworkLoop.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("Error in ConnectToServer: " + ex.Message);
                 throw;
             }
         }
@@ -126,20 +129,24 @@
     /// <returns></returns>
     private async Task NetworkLoop()
     {
-        Console.WriteLine("NetworkLoop()");
+        Console.WriteLine("NetworkLoop started.");
 
         while (connection.IsConnected)
         {
             try
             {
+                Console.WriteLine("Waiting for server data...");
                 // Start receiving data from the server
                 await networkController.ReceiveFromServerAsync();
+                Console.WriteLine("Data received from server.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("Error in NetworkLoop: " + ex.Message);
                 break;
             }
         }
+        Console.WriteLine("Exited NetworkLoop.");
     }
 
 }
@@ -234,11 +241,7 @@
     {
         while (true)
         {
-            // Create a copy of the world to pass to DrawFrameAsync
-            World snapshot = new World(networkController.theWorld);
-
-            // Draw the frame
-            await DrawFrameAsync(snapshot);
+            await DrawFrameAsync();
 
             // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
@@ -249,7 +252,7 @@
     ///     Draws one frame of the game.
     /// </summary>
     /// <returns></returns>
-    private async Task DrawFrameAsync(World snapshot)
+    private async Task DrawFrameAsync()
     {
         // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
@@ -257,18 +260,28 @@
         // Draw background image
         await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
 
-        // Draw Walls
-
-
-        // Draw Powerups
-
-        // Draw Snakes
-
         // Finish batch drawing
         await context.EndBatchAsync();
 
         // Must do this whenever something changes the way it needs to be displayed
         StateHasChanged();
+    }
+
+    private async Task DrawWallAsync(Wall wall)
+    {
+        // Set the fill color to black
+        await context.SetFillStyleAsync("black");
+
+        // Calculate the width and height based on the difference between P1 and P2
+        int width = Math.Abs(wall.P2.X - wall.P1.X);
+        int height = Math.Abs(wall.P2.Y - wall.P1.Y);
+
+        // Determine the top-left corner for the rectangle
+        int x = Math.Min(wall.P1.X, wall.P2.X);
+        int y = Math.Min(wall.P1.Y, wall.P2.Y);
+
+        // Draw the rectangle
+        await context.FillRectAsync(x, y, width, height);
     }
 
 }
