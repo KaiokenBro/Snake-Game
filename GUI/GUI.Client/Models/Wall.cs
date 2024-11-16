@@ -28,18 +28,7 @@ namespace GUI.Client.Models
         [JsonPropertyName("p2")]
         public Point2D P2 { get; set; }
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="Wall"/> class.
-        ///     Used for JSON deserialization.
-        /// </summary>
-        public Wall(int wallID, Point2D p1, Point2D p2)
-        {
-            WallID = wallID;
-            P1 = p1;
-            P2 = p2;
-        }
-
-        // Default Constructor for deserialization
+        // Default constructor for JSON deserialization
         public Wall() { }
     }
 }

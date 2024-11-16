@@ -29,14 +29,7 @@ namespace GUI.Client.Models
         [JsonPropertyName("died")]
         public bool PowerupDied { get; set; }
 
-        /// <summary>
-        ///     Constructor that initializes a new instance of the <see cref="Powerup"/> class.
-        ///     Used for JSON deserialization.
-        /// </summary>
-        public Powerup()
-        {
-            PowerupLocation = new Point2D();
-        }
+        // Default constructor for JSON deserialization
+        public Powerup() { }
     }
-
 }

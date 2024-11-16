@@ -111,38 +111,39 @@ namespace GUI.Client.Controllers
         {
             Console.WriteLine("ParseJsonData()");
 
-            // Deserialize the JSON message into a dictionary of objects
-            var gameData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonMessage);
-
-            // If its a wall
-            if (gameData.ContainsKey("wall"))
+            try
             {
-                // Extract wall ID
-                int wallID = gameData["wall"].GetInt32();
 
-                // Extract p1 and p2 coordinates
-                int p1X = gameData["p1"].GetProperty("X").GetInt32();
-                int p1Y = gameData["p1"].GetProperty("Y").GetInt32();
-                int p2X = gameData["p2"].GetProperty("X").GetInt32();
-                int p2Y = gameData["p2"].GetProperty("Y").GetInt32();
+                // Check if the JSON is for a wall
+                if (jsonMessage.Contains("\"wall\""))
+                {
+                    // Deserialize the JSON message directly into a Wall object
+                    Wall wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
 
-                // Create Point2D objects for p1 and p2
-                Point2D p1 = new Point2D(p1X, p1Y);
-                Point2D p2 = new Point2D(p2X, p2Y);
+                    // Add the wall in the world's dictionary
+                    theWorld.Walls[wall.WallID] = wall;
+                }
 
-                // Create the Wall object
-                Wall wall = new Wall(wallID, p1, p2);
+                // Check if the JSON is a powerup
+                else if (jsonMessage.Contains("\"power\""))
+                {
+                    // Deserialize the JSON message directly into a Powerip object
+                    Powerup powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
-                // Add or update the wall in theWorld.Walls
-                theWorld.Walls[wallID] = wall;
+                    // Add the power-up in the world's dictionary
+                    theWorld.Powerups[powerup.PowerupID] = powerup;
+                }
 
-                Console.WriteLine($"Wall {wallID} created!");
+                else
+                {
+                    Console.WriteLine("Unknown JSON format.");
+                }
+
             }
-
-            // If its a snake
-
-            // If its a powerup
-
+            catch (Exception)
+            {
+                Console.WriteLine("Error parsing JSON");
+            }
         }
 
         /// <summary>
