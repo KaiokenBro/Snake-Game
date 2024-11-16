@@ -14,7 +14,7 @@ namespace GUI.Client.Controllers
         /// </summary>
         private NetworkConnection network;
 
-        private World theWorld;
+        public World theWorld { get; set; }
 
         private bool receivedID = false;
         private bool receivedSize = false;

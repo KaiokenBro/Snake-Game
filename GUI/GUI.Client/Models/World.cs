@@ -44,12 +44,12 @@ namespace GUI.Client.Models
         ///     Shallow copy constructor.
         /// </summary>
         /// <param name="world"></param>
-        public World(World world)
+        public World(World other)
         {
-            Walls = new(world.Walls);
-            Snakes = new(world.Snakes);
-            Powerups = new(world.Powerups);
-            WorldSize = world.WorldSize;
+            WorldSize = other.WorldSize;
+            Snakes = new Dictionary<int, Snake>(other.Snakes);
+            Walls = new Dictionary<int, Wall>(other.Walls);
+            Powerups = new Dictionary<int, Powerup>(other.Powerups);
         }
     }
 }

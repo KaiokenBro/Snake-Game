@@ -202,8 +202,6 @@
     /// </summary>
     private const int ViewHeight = 1000;
 
-    private World copyWorld;
-
     /// <summary>
     ///     Called automatically after the page is rendered.
     ///     We use this to know when the first page load-
@@ -236,8 +234,11 @@
     {
         while (true)
         {
+            // Create a copy of the world to pass to DrawFrameAsync
+            World snapshot = new World(networkController.theWorld);
+
             // Draw the frame
-            await DrawFrameAsync();
+            await DrawFrameAsync(snapshot);
 
             // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
@@ -248,7 +249,7 @@
     ///     Draws one frame of the game.
     /// </summary>
     /// <returns></returns>
-    private async Task DrawFrameAsync()
+    private async Task DrawFrameAsync(World snapshot)
     {
         // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
@@ -257,6 +258,7 @@
         await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
 
         // Draw Walls
+
 
         // Draw Powerups
 
