@@ -44,11 +44,6 @@
     <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
 </div>
 
-<!-- Wall Image -->
-<div>
-    <img @ref="wallImage" id="wImage" src="images/WallSprite.png" alt="image" style="display:none;" />
-</div>
-
 <!-- Canvas for Game Display -->
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
@@ -76,30 +71,25 @@
     /// <summary>
     ///     Triggered on Connect button.
     /// </summary>
-    private async void ConnectToServer()
+    private async Task ConnectToServer()
     {
-        Console.WriteLine("ConnectToServer called");
+        Console.WriteLine("ConnectToServer()");
 
         if (!connection.IsConnected)
         {
             try
             {
-                Console.WriteLine("Attempting to connect...");
                 // Establish connection to server
                 connection.Connect(ServerNameOrAddress, ServerPort);
-                Console.WriteLine("Connected to the server.");
 
                 // Send PlayerName to server
                 connection.Send(playerName);
-                Console.WriteLine("Sent PlayerName To Server! " + playerName);
 
                 // Create a NetworkController using the NetworkConnection instance
                 networkController = new NetworkController(connection, playerName);
-                Console.WriteLine("Created new NetworkController!");
 
                 // Start the network loop to continuously receive data
                 await NetworkLoop();
-                Console.WriteLine("Started NetworkLoop.");
             }
             catch (Exception ex)
             {
@@ -119,7 +109,6 @@
         if (connection.IsConnected)
         {
             connection.Disconnect();
-            Console.WriteLine("Disconnected From Server!");
         }
     }
 
@@ -129,16 +118,14 @@
     /// <returns></returns>
     private async Task NetworkLoop()
     {
-        Console.WriteLine("NetworkLoop started.");
+        Console.WriteLine("NetworkLoop()");
 
         while (connection.IsConnected)
         {
             try
             {
-                Console.WriteLine("Waiting for server data...");
                 // Start receiving data from the server
                 await networkController.ReceiveFromServerAsync();
-                Console.WriteLine("Data received from server.");
             }
             catch (Exception ex)
             {
@@ -146,7 +133,6 @@
                 break;
             }
         }
-        Console.WriteLine("Exited NetworkLoop.");
     }
 
 }
@@ -192,8 +178,6 @@
     /// </summary>
     private ElementReference backgroundImage;
 
-    private ElementReference wallImage;
-
     /// <summary>
     ///     Reference to Javascript .
     /// </summary>
@@ -220,13 +204,17 @@
     {
         if (firstRender)
         {
+            Console.WriteLine("OnAfterRenderAsync - First Render");
+
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
             this.context = await this.canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
         }
 
-        else
+        else if (connection.IsConnected)
         {
+            Console.WriteLine("OnAfterRenderAsync - Next Render");
+
             // Start the game loop
             // Dont want to await because OnAfterRenderAsync would never return
             GameLoopAsync();
@@ -239,9 +227,24 @@
     /// <returns></returns>
     private async Task GameLoopAsync()
     {
+        Console.WriteLine("GameLoopAsync()");
+
+        int powerupGenerationInterval = 5000; // Generate powerup every 5000ms (5 seconds)
+        int lastPowerupTime = Environment.TickCount;
+
         while (true)
         {
-            await DrawFrameAsync();
+            // Generate a powerup periodically
+            if (Environment.TickCount - lastPowerupTime >= powerupGenerationInterval)
+            {
+                networkController.GeneratePowerup();
+                lastPowerupTime = Environment.TickCount;
+            }
+
+            // Create a copy of the world to pass to DrawFrameAsync
+            World snapshot = new World(networkController.theWorld);
+
+            await DrawFrameAsync(snapshot);
 
             // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
@@ -252,36 +255,66 @@
     ///     Draws one frame of the game.
     /// </summary>
     /// <returns></returns>
-    private async Task DrawFrameAsync()
+    private async Task DrawFrameAsync(World snapshot)
     {
+        Console.WriteLine("DrawFrameAsync()");
+
         // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
 
-        // Draw background image
-        await context.DrawImageAsync(backgroundImage, 0, 0, ViewWidth, ViewHeight);
+        // clip the view so that objects drawn outside the canvas will not be shown
+        await context.RectAsync(0, 0, ViewWidth, ViewHeight);
+        await context.ClipAsync();
+
+        // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
+        await context.SaveAsync();
+
+        // Use a fake "head" object to represent centering logic for now
+        // This is where you'd typically center on the player's snake or desired position
+        var head = new { X = 0, Y = 0 }; // Replace with the actual player's head position
+
+        // Center on origin, move to center of view port
+        await context.TranslateAsync(ViewWidth / 2, ViewHeight / 2);
+        await context.TranslateAsync(-head.X, -head.Y);
+
+        // Draw the background:
+        await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
+
+        // Draw each wall
+        foreach (Wall wall in snapshot.Walls.Values)
+        {
+            // Set the fill color to black
+            await context.SetFillStyleAsync("black");
+
+            // Calculate the width and height based on the difference between P1 and P2
+            int width = Math.Abs(wall.P2.X - wall.P1.X);
+            int height = Math.Abs(wall.P2.Y - wall.P1.Y);
+
+            // Determine the top-left corner for the rectangle
+            int x = Math.Min(wall.P1.X, wall.P2.X);
+            int y = Math.Min(wall.P1.Y, wall.P2.Y);
+
+            // Draw the rectangle
+            await context.FillRectAsync(x, y, width, height);
+        }
+
+        // Draw each powerup
+        foreach (Powerup powerup in snapshot.Powerups.Values)
+        {
+            await context.SetLineWidthAsync(5);
+            await context.SetStrokeStyleAsync($"rgb( 255, 255, 0 )");
+            await context.BeginPathAsync();
+            await context.ArcAsync(powerup.PowerupLocation.X, powerup.PowerupLocation.Y, 3, 0, 2 * Math.PI);
+            await context.StrokeAsync();
+        }
+
+        await context.RestoreAsync();
 
         // Finish batch drawing
         await context.EndBatchAsync();
 
         // Must do this whenever something changes the way it needs to be displayed
         StateHasChanged();
-    }
-
-    private async Task DrawWallAsync(Wall wall)
-    {
-        // Set the fill color to black
-        await context.SetFillStyleAsync("black");
-
-        // Calculate the width and height based on the difference between P1 and P2
-        int width = Math.Abs(wall.P2.X - wall.P1.X);
-        int height = Math.Abs(wall.P2.Y - wall.P1.Y);
-
-        // Determine the top-left corner for the rectangle
-        int x = Math.Min(wall.P1.X, wall.P2.X);
-        int y = Math.Min(wall.P1.Y, wall.P2.Y);
-
-        // Draw the rectangle
-        await context.FillRectAsync(x, y, width, height);
     }
 
 }

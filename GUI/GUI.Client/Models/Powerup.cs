@@ -29,6 +29,13 @@ namespace GUI.Client.Models
         [JsonPropertyName("died")]
         public bool PowerupDied { get; set; }
 
+        public Powerup(int powerupID, Point2D location, bool isDied)
+        {
+            PowerupID = powerupID;
+            PowerupLocation = location;
+            PowerupDied = isDied;
+        }
+
         // Default constructor for JSON deserialization
         public Powerup() { }
     }

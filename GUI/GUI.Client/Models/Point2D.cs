@@ -20,6 +20,17 @@ namespace GUI.Client.Models
         public int Y { get; set; }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Point2D"/> class with specified X and Y coordinates.
+        /// </summary>
+        /// <param name="x">The X-coordinate of the point.</param>
+        /// <param name="y">The Y-coordinate of the point.</param>
+        public Point2D(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        /// <summary>
         ///     Constructor that Initializes a new instance of the <see cref="Point2D"/> class.
         ///     Used for JSON deserialization.
         /// </summary>

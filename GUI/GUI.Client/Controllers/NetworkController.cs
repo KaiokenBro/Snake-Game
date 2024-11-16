@@ -23,6 +23,8 @@ namespace GUI.Client.Controllers
         private int playerID;
         private string playerName;
 
+        private int powerupCounter = 0; // Counter for unique powerup IDs
+
         public NetworkController(NetworkConnection connection, string playerName)
         {
             this.network = connection;
@@ -66,7 +68,6 @@ namespace GUI.Client.Controllers
                     {
                         playerID = parsedPlayerID;
                         receivedID = true;
-                        Console.WriteLine("PlayerID Received!");
                     }
                 }
                 else if (!receivedSize)
@@ -76,27 +77,21 @@ namespace GUI.Client.Controllers
                     {
                         worldSize = parsedWorldSize;
                         receivedSize = true;
-                        Console.WriteLine("worldSize Received!");
 
                         // Now that we have the world size, create a new World instance
                         theWorld = new World(worldSize);
-                        Console.WriteLine("World Created!");
 
                         // Create a new Snake for the player
                         Snake userSnake = new Snake();
-                        Console.WriteLine("Snake Created!");
 
                         // Set new snakes ID
                         userSnake.SnakeID = playerID;
-                        Console.WriteLine("SnakeID Assigned!");
 
                         // Set snakes player name
                         userSnake.PlayerName = playerName;
-                        Console.WriteLine("PlayerName Assigned!");
 
                         // Add the Snake to the world
                         theWorld.Snakes[playerID] = userSnake;
-                        Console.WriteLine("Snake Added To World!");
                     }
                 }
             }
@@ -119,11 +114,9 @@ namespace GUI.Client.Controllers
                 {
                     // Deserialize the JSON message directly into a Wall object
                     Wall wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
-                    Console.WriteLine("Wall Object Created!");
 
                     // Add the wall in the world's dictionary
                     theWorld.Walls[wall.WallID] = wall;
-                    Console.WriteLine("Wall Object Added to World!");
                 }
 
                 // Check if the JSON is a powerup
@@ -135,6 +128,8 @@ namespace GUI.Client.Controllers
                     // Add the power-up in the world's dictionary
                     theWorld.Powerups[powerup.PowerupID] = powerup;
                 }
+
+                // Check if the JSON is a snake
 
                 else
                 {
@@ -187,5 +182,46 @@ namespace GUI.Client.Controllers
             network.Send(commandJson);
         }
 
+        public void GeneratePowerup()
+        {
+            // Generate a unique ID for the powerup
+            int powerupID = powerupCounter;
+
+            // Increment the counter for the next powerup
+            powerupCounter++;
+
+            // Generate random location within the world bounds
+            Random random = new Random();
+            int x = random.Next(-worldSize / 2, worldSize / 2);
+            int y = random.Next(-worldSize / 2, worldSize / 2);
+
+            // Create the powerup object
+            Powerup powerup = new Powerup(powerupID, new Point2D(x, y), false);
+
+            // Add the powerup to the world
+            theWorld.Powerups[powerupID] = powerup;
+
+            // Notify the server about the new powerup
+            SendPowerupToServer(powerup);
+        }
+
+        private void SendPowerupToServer(Powerup powerup)
+        {
+            string powerupJson = JsonSerializer.Serialize(powerup);
+            network.Send(powerupJson);
+        }
+
+        private void CollectPowerup(int powerupID, int playerID)
+        {
+            if (theWorld.Powerups.ContainsKey(powerupID))
+            {
+                theWorld.Powerups.Remove(powerupID);
+
+                // Notify the server about the collection
+                var interaction = new { playerID = playerID, powerupID = powerupID };
+                string interactionJson = JsonSerializer.Serialize(interaction);
+                network.Send(interactionJson);
+            }
+        }
     }
 }
