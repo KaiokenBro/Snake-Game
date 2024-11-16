@@ -51,50 +51,5 @@ namespace GUI.Client.Models
             Powerups = new(world.Powerups);
             WorldSize = world.WorldSize;
         }
-
-        /// <summary>
-        ///     Method to add or update snake in the world.
-        /// </summary>
-        /// <param name="snake">The snake to add or update.</param>
-        public void AddOrUpdateSnake(Snake snake)
-        {
-            this.Snakes[snake.SnakeID] = snake;
-        }
-
-        /// <summary>
-        ///     Method to remove snake from the world.
-        /// </summary>
-        /// <param name="snakeID">The ID of the snake to remove.</param>
-        public void RemoveSnake(int snakeID)
-        {
-            this.Snakes.Remove(snakeID);
-        }
-
-        /// <summary>
-        ///     Method to add or update powerup in the world.
-        /// </summary>
-        /// <param name="powerup">The powerup to add or update.</param>
-        public void AddOrUpdatePowerup(Powerup powerup)
-        {
-            this.Powerups[powerup.PowerupID] = powerup;
-        }
-
-        /// <summary>
-        ///     Method to remove powerup from the world.
-        /// </summary>
-        /// <param name="powerupID">The ID of the powerup to remove.</param>
-        public void RemovePowerup(int powerupID)
-        {
-            this.Powerups.Remove(powerupID);
-        }
-
-        /// <summary>
-        ///     Method to add or update wall in the world.
-        /// </summary>
-        /// <param name="wall">The wall to add or update.</param>
-        public void AddOrUpdateWall(Wall wall)
-        {
-            this.Walls[wall.WallID] = wall;
-        }
     }
 }

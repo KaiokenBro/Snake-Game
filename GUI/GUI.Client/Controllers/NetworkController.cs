@@ -119,9 +119,11 @@ namespace GUI.Client.Controllers
                 {
                     // Deserialize the JSON message directly into a Wall object
                     Wall wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
+                    Console.WriteLine("Wall Object Created!");
 
                     // Add the wall in the world's dictionary
                     theWorld.Walls[wall.WallID] = wall;
+                    Console.WriteLine("Wall Object Added to World!");
                 }
 
                 // Check if the JSON is a powerup
