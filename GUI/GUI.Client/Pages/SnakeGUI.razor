@@ -53,24 +53,12 @@
 @code
 {
 
-    // Server Name
     private string ServerNameOrAddress = "localhost";
-
-    // Port
     private int ServerPort = 11000;
-
-    // Create a new NetworkConnection instance
     private NetworkConnection connection = new NetworkConnection();
-
-    // Player name
     private string playerName;
-
-    // Controller
     private NetworkController networkController;
 
-    /// <summary>
-    ///     Triggered on Connect button.
-    /// </summary>
     private async Task ConnectToServer()
     {
         Console.WriteLine("ConnectToServer()");
@@ -99,9 +87,6 @@
         }
     }
 
-    /// <summary>
-    ///     Triggered on Disconnect button.
-    /// </summary>
     private void DisconnectFromServer()
     {
         Console.WriteLine("DisconnectFromServer()");
@@ -112,10 +97,6 @@
         }
     }
 
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
-    /// <returns></returns>
     private async Task NetworkLoop()
     {
         Console.WriteLine("NetworkLoop()");
@@ -137,70 +118,20 @@
 
 }
 
-<!-- User Input -->
-@code
-{
-
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
-    /// <param name="key"></param>
-    [JSInvokable]
-    public void HandleKeyPress(string key)
-    {
-        // Only works if IsConnected
-        if (!connection.IsConnected)
-        {
-            return;
-        }
-
-        networkController.KeyPressCommand(key);
-    }
-
-}
-
 <!-- Rendering Game State -->
 @code
 {
 
-    /// <summary>
-    ///     C# reference to the html element for the drawing canvas.
-    /// </summary>
     private BECanvasComponent canvasReference = null!;
-
-    /// <summary>
-    ///     Object attached to the canvas that has all the drawing methods.
-    /// </summary>
     private Canvas2DContext context = null!;
-
-    /// <summary>
-    ///     C# reference to the html element for the background image.
-    /// </summary>
     private ElementReference backgroundImage;
-
-    /// <summary>
-    ///     Reference to Javascript .
-    /// </summary>
     private IJSObjectReference jsModule = null!;
-
-    /// <summary>
-    ///     Width of the display canvas.
-    /// </summary>
     private const int viewSize = 1000;
 
-    /// <summary>
-    ///     Called automatically after the page is rendered.
-    ///     We use this to know when the first page load-
-    ///     has occurred so we can initialize various data and start the server and drawing loops.
-    /// </summary>
-    /// <param name="firstRender"></param>
-    /// <returns></returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            Console.WriteLine("OnAfterRenderAsync - First Render");
-
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
             this.context = await this.canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
@@ -208,21 +139,19 @@
 
         else if (connection.IsConnected)
         {
-            Console.WriteLine("OnAfterRenderAsync - Next Render");
-
             // Start the game loop
             // Dont want to await because OnAfterRenderAsync would never return
             GameLoopAsync();
         }
     }
 
-    /// <summary>
-    ///     Renders the view once every 20 milliseconds (50 frames/second)
-    /// </summary>
-    /// <returns></returns>
     private async Task GameLoopAsync()
     {
-        Console.WriteLine("GameLoopAsync()");
+        while (networkController.theWorld == null)
+        {
+            Console.WriteLine("Waiting for the world to be initialized...");
+            await Task.Delay(100); // Wait for 100ms before checking again
+        }
 
         while (true)
         {
@@ -237,44 +166,31 @@
         }
     }
 
-    /// <summary>
-    ///     Draws one frame of the game.
-    /// </summary>
-    /// <returns></returns>
     private async Task DrawFrameAsync(World snapshot)
     {
-        Console.WriteLine("DrawFrameAsync()");
-
-        // Batch the drawing calls for better performance
-        await context.BeginBatchAsync();
-
         // clip the view so that objects drawn outside the canvas will not be shown
+        await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
         await context.ClipAsync();
 
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
 
-        // Use a fake "head" object to represent centering logic for now
-        // This is where you'd typically center on the player's snake or desired position
-        Point2D head = new Point2D{ X = 0, Y = 0 }; // Replace with the actual player's head position
+        // Head of the snake
+        Point2D head = new Point2D(0, 0);
 
-        // Center on snake, move to center of view port
+        // Center on origin, move to center of view port
         await context.TranslateAsync(viewSize / 2, viewSize / 2);
-        await context.TranslateAsync(0, 0);
+        await context.TranslateAsync(-head.X, -head.Y);
 
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
 
+        // Draw black circles (Debug)
+        await DrawTestCircleAsync(snapshot);
+
         // Draw each powerup
-        foreach (Powerup powerup in snapshot.Powerups.Values)
-        {
-            await context.SetLineWidthAsync(5);
-            await context.SetStrokeStyleAsync($"rgb( 255, 255, 0 )");
-            await context.BeginPathAsync();
-            await context.ArcAsync(powerup.PowerupLocation.X, powerup.PowerupLocation.Y, 3, 0, 2 * Math.PI);
-            await context.StrokeAsync();
-        }
+        await DrawPowerupsAsync(snapshot);
 
         await context.RestoreAsync();
 
@@ -283,6 +199,52 @@
 
         // Must do this whenever something changes the way it needs to be displayed
         StateHasChanged();
+    }
+
+    private async Task DrawTestCircleAsync(World snapshot)
+    {
+        // Draw a test circle at (0, 0)
+        await context.SetFillStyleAsync("rgb(0, 0, 0)");
+        await context.BeginPathAsync();
+        await context.ArcAsync(0, 0, 10, 0, 2 * Math.PI);
+        await context.FillAsync();
+
+        // Draw test point for wall
+        await context.SetFillStyleAsync("rgb(0, 0, 0)");
+        await context.BeginPathAsync();
+        await context.ArcAsync(-975, -975, 10, 0, 2 * Math.PI);
+        await context.FillAsync();
+
+    }
+
+    private async Task DrawPowerupsAsync(World snapshot)
+    {
+        foreach (Powerup powerup in snapshot.Powerups.Values)
+        {
+            await context.SetLineWidthAsync(5);
+            await context.SetStrokeStyleAsync($"rgb( 255, 255, 0 )");
+            await context.BeginPathAsync();
+            await context.ArcAsync(powerup.PowerupLocation.X, powerup.PowerupLocation.Y, 3, 0, 2 * Math.PI);
+            await context.StrokeAsync();
+        }
+    }
+
+}
+
+<!-- User Input -->
+@code
+{
+
+    [JSInvokable]
+    public void HandleKeyPress(string key)
+    {
+        // Only works if IsConnected
+        if (!connection.IsConnected)
+        {
+            return;
+        }
+
+        networkController.KeyPressCommand(key);
     }
 
 }

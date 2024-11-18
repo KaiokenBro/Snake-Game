@@ -4,18 +4,12 @@ using System.Text.Json;
 
 namespace GUI.Client.Controllers
 {
-    /// <summary>
-    ///     TODO: XML COMMENT.
-    /// </summary>
+
     public class NetworkController
     {
-        /// <summary>
-        ///     TODO: XML COMMENT.
-        /// </summary>
+
         private NetworkConnection network;
-
         public World theWorld { get; set; }
-
         private bool receivedID = false;
         private bool receivedSize = false;
         private int worldSize;
@@ -28,13 +22,8 @@ namespace GUI.Client.Controllers
             this.playerName = playerName;
         }
 
-        /// <summary>
-        ///     Method to start listening for data from the server.
-        /// </summary>
         public async Task ReceiveFromServerAsync()
         {
-            Console.WriteLine("ReceiveFromServerAsync()");
-
             while (network.IsConnected)
             {
                 try
@@ -53,8 +42,6 @@ namespace GUI.Client.Controllers
 
         public void HandleServerData(string message)
         {
-            Console.WriteLine("HandleServerData()");
-
             // Handle first 2 messages from server, PlayerID and WorldSize
             if (!receivedID || !receivedSize)
             {
@@ -114,6 +101,13 @@ namespace GUI.Client.Controllers
 
                     // Add the wall in the world's dictionary
                     theWorld.Walls[wall.WallID] = wall;
+
+                    Console.WriteLine("Wall Created.");
+                    Console.WriteLine($"WallID: {wall.WallID}");
+                    Console.WriteLine($"P1x: {wall.P1.X}");
+                    Console.WriteLine($"P1y: {wall.P1.Y}");
+                    Console.WriteLine($"P2x: {wall.P2.X}");
+                    Console.WriteLine($"P2y: {wall.P2.Y}");
                 }
 
                 // Check if the JSON is a powerup
@@ -124,6 +118,12 @@ namespace GUI.Client.Controllers
 
                     // Add the power-up in the world's dictionary
                     theWorld.Powerups[powerup.PowerupID] = powerup;
+
+                    Console.WriteLine("Powerup Created.");
+                    Console.WriteLine($"PowerupID: {powerup.PowerupID}");
+                    Console.WriteLine($"Powerup Location X: {powerup.PowerupLocation.X}");
+                    Console.WriteLine($"Powerup Location Y: {powerup.PowerupLocation.Y}");
+                    Console.WriteLine($"Powerup Died: {powerup.PowerupDied}");
                 }
 
                 // Check if the JSON is a snake
@@ -134,6 +134,25 @@ namespace GUI.Client.Controllers
 
                     // Add the snake in the world's dictionary
                     theWorld.Snakes[snake.SnakeID] = snake;
+
+                    Console.WriteLine("Snake Created");
+                    Console.WriteLine($"SnakeID: {snake.SnakeID}");
+                    Console.WriteLine($"Snake Name: {snake.PlayerName}");
+                    Console.WriteLine($"Snake Score: {snake.PlayerScore}");
+                    Console.WriteLine($"Snake Joined: {snake.PlayerJoined}");
+                    Console.WriteLine($"Snake Direction X: {snake.SnakeDirection.X}");
+                    Console.WriteLine($"Snake Direction Y: {snake.SnakeDirection.Y}");
+                    Console.WriteLine($"Snake Disconnected: {snake.PlayerDisconnected}");
+                    Console.WriteLine($"Snake Alive: {snake.SnakeAlive}");
+                    Console.WriteLine($"Snake Died: {snake.SnakeDied}");
+
+                    Console.WriteLine($"SnakeBody: ");
+
+                    // Debug the snake's body
+                    for (int i = 0; i < snake.SnakeBody.Count; i++)
+                    {
+                        Console.WriteLine($"  Segment {i}: X={snake.SnakeBody[i].X}, Y={snake.SnakeBody[i].Y}");
+                    }
                 }
             }
             catch (Exception)
@@ -142,10 +161,6 @@ namespace GUI.Client.Controllers
             }
         }
 
-        /// <summary>
-        ///     TODO: XML COMMENT.
-        /// </summary>
-        /// <param name="key"></param>
         public void KeyPressCommand(string key)
         {
             // Map the key to a movement direction
@@ -168,10 +183,6 @@ namespace GUI.Client.Controllers
             }
         }
 
-        /// <summary>
-        ///     TODO: XML COMMENT.
-        /// </summary>
-        /// <param name="command"></param>
         private void SendCommand(ControlCommand command)
         {
             // Serialize command to JSON format
@@ -180,5 +191,6 @@ namespace GUI.Client.Controllers
             // Send the JSON command to the server
             network.Send(commandJson);
         }
+
     }
 }

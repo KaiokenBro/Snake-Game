@@ -3,8 +3,7 @@ window.initRenderJS = (instance) => {
     window.theInstance = instance;
 };
 
-document.addEventListener('keydown', function (event)
-{
+document.addEventListener('keydown', function (event) {
     // Optionally log the key for testing
     console.log('Key pressed:', event.key);
 
