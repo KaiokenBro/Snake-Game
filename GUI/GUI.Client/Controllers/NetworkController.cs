@@ -18,12 +18,9 @@ namespace GUI.Client.Controllers
 
         private bool receivedID = false;
         private bool receivedSize = false;
-
         private int worldSize;
         private int playerID;
         private string playerName;
-
-        private int powerupCounter = 0; // Counter for unique powerup IDs
 
         public NetworkController(NetworkConnection connection, string playerName)
         {
@@ -120,9 +117,9 @@ namespace GUI.Client.Controllers
                 }
 
                 // Check if the JSON is a powerup
-                else if (jsonMessage.Contains("\"power\""))
+                if (jsonMessage.Contains("\"power\""))
                 {
-                    // Deserialize the JSON message directly into a Powerip object
+                    // Deserialize the JSON message directly into a powerup object
                     Powerup powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
                     // Add the power-up in the world's dictionary
@@ -130,12 +127,14 @@ namespace GUI.Client.Controllers
                 }
 
                 // Check if the JSON is a snake
-
-                else
+                if (jsonMessage.Contains("\"snake\""))
                 {
-                    Console.WriteLine("Unknown JSON format.");
-                }
+                    // Deserialize the JSON message directly into a snake object
+                    Snake snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
+                    // Add the snake in the world's dictionary
+                    theWorld.Snakes[snake.SnakeID] = snake;
+                }
             }
             catch (Exception)
             {
@@ -180,48 +179,6 @@ namespace GUI.Client.Controllers
 
             // Send the JSON command to the server
             network.Send(commandJson);
-        }
-
-        public void GeneratePowerup()
-        {
-            // Generate a unique ID for the powerup
-            int powerupID = powerupCounter;
-
-            // Increment the counter for the next powerup
-            powerupCounter++;
-
-            // Generate random location within the world bounds
-            Random random = new Random();
-            int x = random.Next(-worldSize / 2, worldSize / 2);
-            int y = random.Next(-worldSize / 2, worldSize / 2);
-
-            // Create the powerup object
-            Powerup powerup = new Powerup(powerupID, new Point2D(x, y), false);
-
-            // Add the powerup to the world
-            theWorld.Powerups[powerupID] = powerup;
-
-            // Notify the server about the new powerup
-            SendPowerupToServer(powerup);
-        }
-
-        private void SendPowerupToServer(Powerup powerup)
-        {
-            string powerupJson = JsonSerializer.Serialize(powerup);
-            network.Send(powerupJson);
-        }
-
-        private void CollectPowerup(int powerupID, int playerID)
-        {
-            if (theWorld.Powerups.ContainsKey(powerupID))
-            {
-                theWorld.Powerups.Remove(powerupID);
-
-                // Notify the server about the collection
-                var interaction = new { playerID = playerID, powerupID = powerupID };
-                string interactionJson = JsonSerializer.Serialize(interaction);
-                network.Send(interactionJson);
-            }
         }
     }
 }

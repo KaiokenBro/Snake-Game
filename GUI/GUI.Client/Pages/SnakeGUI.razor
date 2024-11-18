@@ -186,12 +186,7 @@
     /// <summary>
     ///     Width of the display canvas.
     /// </summary>
-    private const int ViewWidth = 1000;
-
-    /// <summary>
-    ///     Height of the display canvas.
-    /// </summary>
-    private const int ViewHeight = 1000;
+    private const int viewSize = 1000;
 
     /// <summary>
     ///     Called automatically after the page is rendered.
@@ -229,17 +224,8 @@
     {
         Console.WriteLine("GameLoopAsync()");
 
-        int powerupGenerationInterval = 5000; // Generate powerup every 5000ms (5 seconds)
-        int lastPowerupTime = Environment.TickCount;
-
         while (true)
         {
-            // Generate a powerup periodically
-            if (Environment.TickCount - lastPowerupTime >= powerupGenerationInterval)
-            {
-                networkController.GeneratePowerup();
-                lastPowerupTime = Environment.TickCount;
-            }
 
             // Create a copy of the world to pass to DrawFrameAsync
             World snapshot = new World(networkController.theWorld);
@@ -263,7 +249,7 @@
         await context.BeginBatchAsync();
 
         // clip the view so that objects drawn outside the canvas will not be shown
-        await context.RectAsync(0, 0, ViewWidth, ViewHeight);
+        await context.RectAsync(0, 0, viewSize, viewSize);
         await context.ClipAsync();
 
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
@@ -271,32 +257,14 @@
 
         // Use a fake "head" object to represent centering logic for now
         // This is where you'd typically center on the player's snake or desired position
-        var head = new { X = 0, Y = 0 }; // Replace with the actual player's head position
+        Point2D head = new Point2D{ X = 0, Y = 0 }; // Replace with the actual player's head position
 
-        // Center on origin, move to center of view port
-        await context.TranslateAsync(ViewWidth / 2, ViewHeight / 2);
-        await context.TranslateAsync(-head.X, -head.Y);
+        // Center on snake, move to center of view port
+        await context.TranslateAsync(viewSize / 2, viewSize / 2);
+        await context.TranslateAsync(0, 0);
 
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
-
-        // Draw each wall
-        foreach (Wall wall in snapshot.Walls.Values)
-        {
-            // Set the fill color to black
-            await context.SetFillStyleAsync("black");
-
-            // Calculate the width and height based on the difference between P1 and P2
-            int width = Math.Abs(wall.P2.X - wall.P1.X);
-            int height = Math.Abs(wall.P2.Y - wall.P1.Y);
-
-            // Determine the top-left corner for the rectangle
-            int x = Math.Min(wall.P1.X, wall.P2.X);
-            int y = Math.Min(wall.P1.Y, wall.P2.Y);
-
-            // Draw the rectangle
-            await context.FillRectAsync(x, y, width, height);
-        }
 
         // Draw each powerup
         foreach (Powerup powerup in snapshot.Powerups.Values)
