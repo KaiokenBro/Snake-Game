@@ -62,7 +62,9 @@ namespace GUI.Client.Controllers
                         worldSize = parsedWorldSize;
                         receivedSize = true;
 
+
                         // Now that we have the world size, create a new World instance
+
                         theWorld = new World(worldSize);
 
                         // Create a new Snake for the player
@@ -100,30 +102,50 @@ namespace GUI.Client.Controllers
                 if (jsonMessage.Contains("\"wall\""))
                 {
                     // Deserialize the JSON message directly into a Wall object
-                    Wall wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
+                    Wall? wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
 
+
+                    /////////////////
                     // Add the wall in the world's dictionary
-                    theWorld.Walls[wall.WallID] = wall;
+                    lock (theWorld)
+                    {
+                        theWorld.Walls[wall.WallID] = wall;
+                    }
                 }
 
                 // Check if the JSON is a powerup
                 if (jsonMessage.Contains("\"power\""))
                 {
                     // Deserialize the JSON message directly into a powerup object
-                    Powerup powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
+                    Powerup? powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
-                    // Add the power-up in the world's dictionary
-                    theWorld.Powerups[powerup.PowerupID] = powerup;
+                    /////
+                    lock (theWorld)
+                    {
+                        // Add the power-up in the world's dictionary
+                        theWorld.Powerups[powerup.PowerupID] = powerup;
+                    }
                 }
 
                 // Check if the JSON is a snake
                 if (jsonMessage.Contains("\"snake\""))
                 {
                     // Deserialize the JSON message directly into a snake object
-                    Snake snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
+                    Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
-                    // Add the snake in the world's dictionary
-                    theWorld.Snakes[snake.SnakeID] = snake;
+                    if (snake != null)
+                    {
+
+                        ////////////////////
+                        lock (theWorld)
+                        {
+                            if (!theWorld.Snakes.ContainsKey(snake.SnakeID))
+                            {
+                                Console.WriteLine($"New snake received: ID={snake.SnakeID}, Name={snake.PlayerName}");
+                            }
+                            theWorld.Snakes[snake.SnakeID] = snake;
+                        }
+                    }
                 }
             }
             catch (Exception)

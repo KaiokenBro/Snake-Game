@@ -58,8 +58,6 @@
     private NetworkConnection connection = new NetworkConnection();
     private string playerName;
     private NetworkController networkController;
-    private World drawingCopy;
-    private Point2D head;
 
     private async Task ConnectToServer()
     {
@@ -97,6 +95,8 @@
         {
             connection.Disconnect();
         }
+
+
     }
 
     private async Task NetworkLoop()
@@ -112,6 +112,7 @@
             }
             catch (Exception ex)
             {
+                DisconnectFromServer();
                 Console.WriteLine("Error in NetworkLoop: " + ex.Message);
                 break;
             }
@@ -129,6 +130,9 @@
     private ElementReference backgroundImage;
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
+
+    private World drawingCopy;
+    private Point2D head;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -184,14 +188,23 @@
         Console.WriteLine("Building Snake");
 
         // Access the snake object based on the player ID
-        Snake snake = snapshot.Snakes[networkController.playerID];
 
-        Console.WriteLine($"SnakeID: {snake.SnakeID}");
+        // Check to see if snake is in the world
+        if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake))
+        {
+            return;
+        }
+
+        // Check to see if snake is initialized
+        if(snake.SnakeBody.Count < 2)
+        {
+            return;
+        }
+
+        // Get the loaction of the snakes head
+        head = snake.SnakeBody[1];
 
         // Get the last point in SnakeBody to represent the head
-        //Point2D head = snake.SnakeBody.Last();
-        Point2D head = snake.SnakeBody[1];
-      //  Point2D head = new(0, 0);
         Console.WriteLine($"Head X: {head.X}");
         Console.WriteLine($"Head Y: {head.Y}");
 
