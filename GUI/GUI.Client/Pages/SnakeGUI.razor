@@ -173,8 +173,6 @@
 
     private async Task DrawFrameAsync(World snapshot)
     {
-        //Console.WriteLine("DrawFrameAsync()");
-
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
@@ -228,7 +226,7 @@
         await context.SetFillStyleAsync("rgb(0, 255, 0)");
 
         // Loop through each part of the snake's body
-        foreach (var snake in snapshot.Snakes.Values)
+        foreach (Snake snake in snapshot.Snakes.Values)
         {
             // Loop through each body part in the snake (body list)
             for (int i = 0; i < snake.SnakeBody.Count; i++)
