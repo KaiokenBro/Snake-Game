@@ -58,6 +58,8 @@
     private NetworkConnection connection = new NetworkConnection();
     private string playerName;
     private NetworkController networkController;
+    private World drawingCopy;
+    private Point2D head;
 
     private async Task ConnectToServer()
     {
@@ -155,11 +157,14 @@
 
         while (true)
         {
-
-            // Create a copy of the world to pass to DrawFrameAsync
             World snapshot = new World(networkController.theWorld);
+            lock (networkController.theWorld)
+            {
+                drawingCopy = new(snapshot);
+            }
+            // Create a copy of the world to pass to DrawFrameAsync
 
-            await DrawFrameAsync(snapshot);
+            await DrawFrameAsync(drawingCopy);
 
             // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
@@ -187,8 +192,8 @@
 
         // Get the last point in SnakeBody to represent the head
         //Point2D head = snake.SnakeBody.Last();
-        Point2D head = snake.SnakeBody[snake.SnakeBody.Count - 1];
-
+        Point2D head = snake.SnakeBody[1];
+      //  Point2D head = new(0, 0);
         Console.WriteLine($"Head X: {head.X}");
         Console.WriteLine($"Head Y: {head.Y}");
 

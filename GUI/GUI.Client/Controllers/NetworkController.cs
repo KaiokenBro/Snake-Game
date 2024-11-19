@@ -66,7 +66,9 @@ namespace GUI.Client.Controllers
                         theWorld = new World(worldSize);
 
                         // Create a new Snake for the player
+
                         Snake userSnake = new Snake();
+
 
                         // Set new snakes ID
                         userSnake.SnakeID = playerID;
@@ -76,6 +78,7 @@ namespace GUI.Client.Controllers
 
                         // Add the Snake to the world
                         theWorld.Snakes[playerID] = userSnake;
+
                     }
                 }
             }
