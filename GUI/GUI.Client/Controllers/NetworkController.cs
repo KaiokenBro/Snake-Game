@@ -97,8 +97,6 @@ namespace GUI.Client.Controllers
                 // Check if the JSON is for a wall
                 if (jsonMessage.Contains("\"wall\""))
                 {
-                    //Console.WriteLine("ParseJsonData(Wall)");
-
                     // Deserialize the JSON message directly into a Wall object
                     Wall? wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
 
@@ -112,8 +110,6 @@ namespace GUI.Client.Controllers
                 // Check if the JSON is a powerup
                 if (jsonMessage.Contains("\"power\""))
                 {
-                    //Console.WriteLine("ParseJsonData(Power)");
-
                     // Deserialize the JSON message directly into a powerup object
                     Powerup? powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
@@ -127,8 +123,6 @@ namespace GUI.Client.Controllers
                 // Check if the JSON is a snake
                 if (jsonMessage.Contains("\"snake\""))
                 {
-                    //Console.WriteLine("ParseJsonData(Snake)");
-
                     // Deserialize the JSON message directly into a snake object
                     Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 

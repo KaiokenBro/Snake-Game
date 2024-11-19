@@ -59,8 +59,6 @@
 
     private async Task ConnectToServer()
     {
-        Console.WriteLine("ConnectToServer()");
-
         if (!connection.IsConnected)
         {
             try
@@ -97,8 +95,6 @@
 
     private async Task NetworkLoop()
     {
-        Console.WriteLine("NetworkLoop()");
-
         while (connection.IsConnected)
         {
             try
@@ -134,8 +130,6 @@
     {
         if (firstRender)
         {
-            Console.WriteLine("OnAfterRenderAsync(FIRSTRENDER)");
-
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
             this.context = await this.canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
@@ -143,8 +137,6 @@
 
         else if (connection.IsConnected)
         {
-            Console.WriteLine("OnAfterRenderAsync(AFTERFIRSTRENDER)");
-
             // Start the game loop
             // Dont want to await because OnAfterRenderAsync would never return
             GameLoopAsync();
@@ -153,12 +145,9 @@
 
     private async void GameLoopAsync()
     {
-        Console.WriteLine("GameLoopAsync()");
-
         while (networkController.theWorld == null)
         {
             Console.WriteLine("Waiting for the world to be initialized...");
-            await Task.Delay(20);
         }
 
         while (true)
@@ -169,15 +158,12 @@
             }
 
             await DrawFrameAsync(snapshot);
-
             await Task.Delay(20);
         }
     }
 
     private async Task DrawFrameAsync(World snapshot)
     {
-        Console.WriteLine("DrawFrameAsync()");
-
         // batch the drawing calls for better performance
         await context.BeginBatchAsync();
 
@@ -189,28 +175,20 @@
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
 
-        Console.WriteLine("Attempting to build Snake");
-
         // Check to see if snake is in the world
         if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake))
         {
-            Console.WriteLine("Snake not yet created");
             return;
         }
 
         // Check to see if snake is initialized
         if (snake.SnakeBody.Count < 2)
         {
-            Console.WriteLine("Snake still in creation");
             return;
         }
 
         // Get the loaction of the snakes head
         head = snake.SnakeBody[1];
-
-        // Get the last point in SnakeBody to represent the head
-        Console.WriteLine($"Head X: {head.X}");
-        Console.WriteLine($"Head Y: {head.Y}");
 
         // Center on origin, move to center of view port
         await context.TranslateAsync(viewSize / 2, viewSize / 2);
@@ -239,8 +217,6 @@
 
     private async Task DrawSnakeAsync(World snapshot)
     {
-        Console.WriteLine("DrawSnakeAsync()");
-
         // Clear the previous frame (optional, depending on your setup)
         await context.ClearRectAsync(0, 0, snapshot.WorldSize, snapshot.WorldSize);
 
@@ -251,8 +227,6 @@
         // Loop through each snake in the snapshot
         foreach (Snake snake in snapshot.Snakes.Values)
         {
-            Console.WriteLine($"Drawing Snake {snake.SnakeID}");
-
             // Loop through each segment in the snake's body
             for (int i = 1; i < snake.SnakeBody.Count; i++)  // Start from 1 to avoid a line from the origin point
             {
