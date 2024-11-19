@@ -206,7 +206,7 @@
         await context.EndBatchAsync();
 
         // Must do this whenever something changes the way it needs to be displayed
-        //StateHasChanged();
+        StateHasChanged();
     }
 
     private async Task DrawSnakeAsync(World snapshot)
@@ -256,30 +256,60 @@
         // Iterate through each wall in the snapshot's walls dictionary
         foreach (Wall wall in snapshot.Walls.Values)
         {
-            // Get the coordinates of the two points defining the wall
-            var p1 = wall.P1;  // First point
-            var p2 = wall.P2;  // Second point
+            var p1 = wall.P1;  // First point of the wall
+            var p2 = wall.P2;  // Second point of the wall
+
+            // Calculate the difference in X and Y coordinates
+            float deltaX = p2.X - p1.X;
+            float deltaY = p2.Y - p1.Y;
+
+            // Calculate the length of the wall using the distance formula
+            float wallLength = MathF.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            // Calculate the number of 50x50 pixel segments
+            int numSegments = (int)(wallLength / 50);  // Divide the total length by 50 pixels per segment
 
             // Set the stroke style for the wall (color, line width, etc.)
             await context.SetStrokeStyleAsync("rgb(0, 0, 0)");  // Example: black walls
             await context.SetLineWidthAsync(5);  // Set line width for drawing
 
-            // Draw the line (wall) between points p1 and p2
-            await context.BeginPathAsync();
-            await context.MoveToAsync(p1.X, p1.Y);  // Move to the first point
-            await context.LineToAsync(p2.X, p2.Y);  // Draw a line to the second point
-            await context.StrokeAsync();  // Apply the stroke (actually draw the line)
+            // Draw each 50x50 segment
+            for (int i = 0; i < numSegments; i++)
+            {
+                // Calculate the position of each segment
+                float segmentX = p1.X + (deltaX / numSegments) * i;
+                float segmentY = p1.Y + (deltaY / numSegments) * i;
+
+                // Draw a small 50x50 square at the calculated position using FillRectAsync
+                await context.FillRectAsync(segmentX, segmentY, 50, 50);  // 50px by 50px segment
+            }
         }
     }
 
     private async Task DrawPowerupsAsync(World snapshot)
     {
+        // Loop through each powerup in the snapshot's collection of powerups
         foreach (Powerup powerup in snapshot.Powerups.Values)
         {
+            // Set line width for drawing the circle border (if desired)
             await context.SetLineWidthAsync(5);
-            await context.SetStrokeStyleAsync($"rgb( 255, 255, 0 )");
+
+            // Set stroke color for the powerup circle
+            await context.SetStrokeStyleAsync("rgb(255, 255, 0)");  // Yellow for the powerup
+
+            // Set fill color for the powerup circle
+            await context.SetFillStyleAsync("rgb(255, 255, 0)");  // Yellow fill
+
+            // Start drawing the path for the powerup (a circle)
             await context.BeginPathAsync();
-            await context.ArcAsync(powerup.PowerupLocation.X, powerup.PowerupLocation.Y, 3, 0, 2 * Math.PI);
+
+            // Draw a circle with 8px radius (16px diameter), centered on the powerup location
+            await context.ArcAsync(powerup.PowerupLocation.X, powerup.PowerupLocation.Y, 8, 0, 2 * Math.PI);
+
+            // Fill the circle
+            await context.FillAsync();
+
+            // Stroke the circle border
             await context.StrokeAsync();
         }
     }
