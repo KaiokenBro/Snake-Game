@@ -127,7 +127,7 @@
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
 
-    private World snapshot;
+    public World snapshot;
     private Point2D head;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -144,6 +144,7 @@
         else if (connection.IsConnected)
         {
             Console.WriteLine("OnAfterRenderAsync(AFTERFIRSTRENDER)");
+
             // Start the game loop
             // Dont want to await because OnAfterRenderAsync would never return
             GameLoopAsync();
@@ -177,6 +178,9 @@
     private async Task DrawFrameAsync(World snapshot)
     {
         Console.WriteLine("DrawFrameAsync()");
+
+        // batch the drawing calls for better performance
+        await context.BeginBatchAsync();
 
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
@@ -216,11 +220,11 @@
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
 
-        // Draw walls
-        await DrawWallsAsync(snapshot);
-
         // Draw snake
         await DrawSnakeAsync(snapshot);
+
+        // Draw walls
+        await DrawWallsAsync(snapshot);
 
         // Draw powerups
         await DrawPowerupsAsync(snapshot);
