@@ -186,10 +186,13 @@
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
 
-        // Draw black circles (Debug)
-        await DrawTestCircleAsync(snapshot);
+        // Draw walls
+        await DrawWallsAsync(snapshot);
 
-        // Draw each powerup
+        // Draw snake
+        await DrawSnakeAsync(snapshot);
+
+        // Draw powerups
         await DrawPowerupsAsync(snapshot);
 
         await context.RestoreAsync();
@@ -201,20 +204,52 @@
         StateHasChanged();
     }
 
-    private async Task DrawTestCircleAsync(World snapshot)
+    private async Task DrawSnakeAsync(World snapshot)
     {
-        // Draw a test circle at (0, 0)
-        await context.SetFillStyleAsync("rgb(0, 0, 0)");
-        await context.BeginPathAsync();
-        await context.ArcAsync(0, 0, 10, 0, 2 * Math.PI);
-        await context.FillAsync();
+        // Set the fill color for the body of the snake (green)
+        await context.SetFillStyleAsync("rgb(0, 255, 0)");
 
-        // Draw test point for wall
-        await context.SetFillStyleAsync("rgb(0, 0, 0)");
-        await context.BeginPathAsync();
-        await context.ArcAsync(-975, -975, 10, 0, 2 * Math.PI);
-        await context.FillAsync();
+        // Loop through each part of the snake's body
+        foreach (var snake in snapshot.Snakes.Values)
+        {
+            // Loop through each body part in the snake (body list)
+            for (int i = 0; i < snake.SnakeBody.Count; i++)
+            {
+                var segment = snake.SnakeBody[i];
 
+                // Check if this is the last segment (snake's head)
+                if (i == snake.SnakeBody.Count - 1)
+                {
+                    // Set a different color for the head
+                    await context.SetFillStyleAsync("rgb(255, 0, 0)");  // Red color for the head
+                }
+                else
+                {
+                    // Set the body color (green)
+                    await context.SetFillStyleAsync("rgb(0, 255, 0)");
+                }
+
+                // Draw each segment of the snake as a circle (or square)
+                await context.BeginPathAsync();
+                await context.ArcAsync(segment.X, segment.Y, 10, 0, 2 * Math.PI);  // Draw circle at (X, Y) with radius 10
+                await context.FillAsync();  // Fill the circle with the current fill style
+            }
+        }
+    }
+
+    private async Task DrawWallsAsync(World snapshot)
+    {
+        foreach (Wall wall in snapshot.Walls.Values)
+        {
+            // Get the coordinates of the wall (top-left and bottom-right corners)
+            int startX = wall.P1.X;
+            int startY = wall.P1.Y;
+            int width = Math.Abs(wall.P2.X - wall.P1.X);  // Width is the difference in X
+            int height = Math.Abs(wall.P2.Y - wall.P1.Y); // Height is the difference in Y
+
+            // Draw a filled rectangle for each wall
+            await context.FillRectAsync(startX, startY, width, height);
+        }
     }
 
     private async Task DrawPowerupsAsync(World snapshot)
