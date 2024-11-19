@@ -37,6 +37,8 @@
     </div>
 </div>
 
+<br />
+
 <!-- Background Image -->
 <div>
     <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
@@ -167,6 +169,9 @@
         // Clear the previous frame
         await context.ClearRectAsync(0, 0, snapshot.WorldSize, snapshot.WorldSize);
 
+        await context.SetFillStyleAsync("lightblue");
+        await context.FillRectAsync(0, 0, 1000, 1000);
+
         // Clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
@@ -190,7 +195,7 @@
 
         // Draw the background
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
-        
+
         // Draw the snakes
         await DrawSnakeAsync(snapshot);
 
@@ -255,37 +260,40 @@
 
     private async Task DrawWallsAsync(World snapshot)
     {
-        // Loop through each wall in the snapshot's collection of walls
+        // Iterate through each wall in the snapshot's walls dictionary
         foreach (Wall wall in snapshot.Walls.Values)
         {
-            var p1 = wall.P1;  // First point of the wall
-            var p2 = wall.P2;  // Second point of the wall
+            var p1 = wall.P1;  // Center point of the first segment
+            var p2 = wall.P2;  // Center point of the second segment
 
-            // Calculate the difference in X and Y coordinates
-            float deltaX = p2.X - p1.X;
-            float deltaY = p2.Y - p1.Y;
+            // Calculate the difference in X and Y coordinates (using integer math)
+            int deltaX = p2.X - p1.X;
+            int deltaY = p2.Y - p1.Y;
 
-            // Calculate the length of the wall using the distance formula
-            float wallLength = MathF.Sqrt(deltaX * deltaX + deltaY * deltaY);
+            // Calculate the length of the wall using the distance formula (still using int for simplicity)
+            int wallLength = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
-            // Calculate the number of 50x50 pixel segments
-            int numSegments = (int)(wallLength / 50);  // Divide the total length by 50 pixels per segment
+            // Calculate the number of 50x50 pixel segments (rounded to nearest whole number)
+            int numSegments = wallLength / 50;  // Divide the total length by 50 pixels per segment
 
-            // Set the stroke style for the wall (color, line width, etc.)
-            await context.SetStrokeStyleAsync("rgb(0, 0, 0)");  // Example: black walls
-            await context.SetLineWidthAsync(5);  // Set line width for drawing
+            // Set the fill style for the wall (color, etc.)
+            await context.SetFillStyleAsync("rgb(0, 0, 0)");  // Solid black walls
+
+            // Set line width for drawing (optional)
+            await context.SetLineWidthAsync(5);  // Optional, can adjust or remove
 
             // Draw each 50x50 segment
             for (int i = 0; i < numSegments; i++)
             {
-                // Calculate the position of each segment
-                float segmentX = p1.X + (deltaX / numSegments) * i;
-                float segmentY = p1.Y + (deltaY / numSegments) * i;
+                // Calculate the position of each segment based on the center points (use int for simplicity)
+                int segmentX = p1.X + (deltaX * i) / numSegments - 25;  // Adjust X to center the segment
+                int segmentY = p1.Y + (deltaY * i) / numSegments - 25;  // Adjust Y to center the segment
 
-                // Draw a small 50x50 square at the calculated position using FillRectAsync
+                // Draw a solid black 50x50 square at the calculated position
                 await context.FillRectAsync(segmentX, segmentY, 50, 50);  // 50px by 50px segment
             }
         }
+
     }
 
     private async Task DrawPowerupsAsync(World snapshot)
