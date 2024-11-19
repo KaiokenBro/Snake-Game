@@ -31,7 +31,7 @@ namespace GUI.Client.Controllers
                     // Asynchronously receive data from the network
                     string message = await Task.Run(() => network.ReadLine());
 
-                    await HandleServerData(message);
+                    HandleServerData(message);
                 }
                 catch (Exception)
                 {
@@ -40,7 +40,7 @@ namespace GUI.Client.Controllers
             }
         }
 
-        public async Task HandleServerData(string message)
+        public void HandleServerData(string message)
         {
             // Handle first 2 messages from server, PlayerID and WorldSize
             if (!receivedID || !receivedSize)
