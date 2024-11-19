@@ -75,9 +75,8 @@
                 // Start the network loop to continuously receive data
                 await NetworkLoop();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine("Error in ConnectToServer: " + ex.Message);
                 throw;
             }
         }
@@ -85,8 +84,6 @@
 
     private void DisconnectFromServer()
     {
-        Console.WriteLine("DisconnectFromServer()");
-
         if (connection.IsConnected)
         {
             connection.Disconnect();
@@ -102,10 +99,8 @@
                 // Start receiving data from the server
                 await networkController.ReceiveFromServerAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                DisconnectFromServer();
-                Console.WriteLine("Error in NetworkLoop: " + ex.Message);
                 break;
             }
         }
@@ -128,6 +123,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // First render
         if (firstRender)
         {
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
@@ -135,21 +131,22 @@
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
         }
 
+        // Once connection is established
         else if (connection.IsConnected)
         {
-            // Start the game loop
-            // Dont want to await because OnAfterRenderAsync would never return
             GameLoopAsync();
         }
     }
 
     private async void GameLoopAsync()
     {
+        // Wait for theWorld to be initialized
         while (networkController.theWorld == null)
         {
             await Task.Delay(20);
         }
 
+        // Infinite loop
         while (true)
         {
             lock (networkController.theWorld)
@@ -164,10 +161,13 @@
 
     private async Task DrawFrameAsync(World snapshot)
     {
-        // batch the drawing calls for better performance
+        // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
 
-        // clip the view so that objects drawn outside the canvas will not be shown
+        // Clear the previous frame
+        await context.ClearRectAsync(0, 0, snapshot.WorldSize, snapshot.WorldSize);
+
+        // Clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
         await context.ClipAsync();
@@ -188,37 +188,33 @@
         await context.TranslateAsync(viewSize / 2, viewSize / 2);
         await context.TranslateAsync(-head.X, -head.Y);
 
-        // Draw the background:
+        // Draw the background
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
-
-        // Draw snake
+        
+        // Draw the snakes
         await DrawSnakeAsync(snapshot);
 
-        // Draw walls
+        // Draw the walls
         await DrawWallsAsync(snapshot);
 
-        // Draw powerups
+        // Draw the powerups
         await DrawPowerupsAsync(snapshot);
 
         await context.RestoreAsync();
 
         // Finish batch drawing
         await context.EndBatchAsync();
-
-        // Must do this whenever something changes the way it needs to be displayed
-        StateHasChanged();
     }
 
     private async Task DrawSnakeAsync(World snapshot)
     {
-        // Clear the previous frame (optional, depending on your setup)
-        await context.ClearRectAsync(0, 0, snapshot.WorldSize, snapshot.WorldSize);
-
         // Set the stroke color to black for drawing the line
         await context.SetStrokeStyleAsync("rgb(0, 0, 0)");
-        await context.SetLineWidthAsync(10);  // Set the stroke width to 10 pixels
 
-        // Loop through each snake in the snapshot
+        // Set the stroke width to 10 pixels
+        await context.SetLineWidthAsync(10);
+
+        // Loop through each snake in the snapshot's collection of snakes
         foreach (Snake snake in snapshot.Snakes.Values)
         {
             // Loop through each segment in the snake's body
@@ -241,19 +237,25 @@
             }
 
             // Draw a red circle on the head (last segment of the snake)
-            var head = snake.SnakeBody[snake.SnakeBody.Count - 1]; // The head is the last segment
+            var head = snake.SnakeBody[snake.SnakeBody.Count - 1];
 
-            await context.SetFillStyleAsync("rgb(255, 0, 0)"); // Set color to red
+            // Set color to red
+            await context.SetFillStyleAsync("rgb(255, 0, 0)");
+
             await context.BeginPathAsync();
-            await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI); // Draw a circle with a radius of 10
-            await context.FillAsync(); // Fill the circle with the current fill style
+
+            // Draw a circle with a radius of 10
+            await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
+
+            // Fill the circle with the current fill style
+            await context.FillAsync();
         }
 
     }
 
     private async Task DrawWallsAsync(World snapshot)
     {
-        // Iterate through each wall in the snapshot's walls dictionary
+        // Loop through each wall in the snapshot's collection of walls
         foreach (Wall wall in snapshot.Walls.Values)
         {
             var p1 = wall.P1;  // First point of the wall
