@@ -147,7 +147,7 @@
     {
         while (networkController.theWorld == null)
         {
-            Console.WriteLine("Waiting for the world to be initialized...");
+            await Task.Delay(20);
         }
 
         while (true)
@@ -175,14 +175,8 @@
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
 
-        // Check to see if snake is in the world
-        if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake))
-        {
-            return;
-        }
-
-        // Check to see if snake is initialized
-        if (snake.SnakeBody.Count < 2)
+        // Check if the snake exists and is initialized
+        if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake) || snake.SnakeBody.Count < 2)
         {
             return;
         }
@@ -212,7 +206,7 @@
         await context.EndBatchAsync();
 
         // Must do this whenever something changes the way it needs to be displayed
-        StateHasChanged();
+        //StateHasChanged();
     }
 
     private async Task DrawSnakeAsync(World snapshot)
@@ -259,16 +253,22 @@
 
     private async Task DrawWallsAsync(World snapshot)
     {
+        // Iterate through each wall in the snapshot's walls dictionary
         foreach (Wall wall in snapshot.Walls.Values)
         {
-            // Get the coordinates of the wall (top-left and bottom-right corners)
-            int startX = wall.P1.X;
-            int startY = wall.P1.Y;
-            int width = Math.Abs(wall.P2.X - wall.P1.X);  // Width is the difference in X
-            int height = Math.Abs(wall.P2.Y - wall.P1.Y); // Height is the difference in Y
+            // Get the coordinates of the two points defining the wall
+            var p1 = wall.P1;  // First point
+            var p2 = wall.P2;  // Second point
 
-            // Draw a filled rectangle for each wall
-            await context.FillRectAsync(startX, startY, width, height);
+            // Set the stroke style for the wall (color, line width, etc.)
+            await context.SetStrokeStyleAsync("rgb(0, 0, 0)");  // Example: black walls
+            await context.SetLineWidthAsync(5);  // Set line width for drawing
+
+            // Draw the line (wall) between points p1 and p2
+            await context.BeginPathAsync();
+            await context.MoveToAsync(p1.X, p1.Y);  // Move to the first point
+            await context.LineToAsync(p2.X, p2.Y);  // Draw a line to the second point
+            await context.StrokeAsync();  // Apply the stroke (actually draw the line)
         }
     }
 
