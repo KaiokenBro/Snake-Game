@@ -13,7 +13,7 @@ namespace GUI.Client.Controllers
         private bool receivedID = false;
         private bool receivedSize = false;
         private int worldSize;
-        private int playerID;
+        public int playerID;
         private string playerName;
 
         public NetworkController(NetworkConnection connection, string playerName)

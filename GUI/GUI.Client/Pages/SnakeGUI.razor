@@ -168,6 +168,8 @@
 
     private async Task DrawFrameAsync(World snapshot)
     {
+        //Console.WriteLine("DrawFrameAsync()");
+
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
@@ -176,8 +178,19 @@
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
 
-        // Head of the snake
-        Point2D head = new Point2D(0, 0);
+        Console.WriteLine("Building Snake");
+
+        // Access the snake object based on the player ID
+        Snake snake = snapshot.Snakes[networkController.playerID];
+
+        Console.WriteLine($"SnakeID: {snake.SnakeID}");
+
+        // Get the last point in SnakeBody to represent the head
+        //Point2D head = snake.SnakeBody.Last();
+        Point2D head = snake.SnakeBody[snake.SnakeBody.Count - 1];
+
+        Console.WriteLine($"Head X: {head.X}");
+        Console.WriteLine($"Head Y: {head.Y}");
 
         // Center on origin, move to center of view port
         await context.TranslateAsync(viewSize / 2, viewSize / 2);
