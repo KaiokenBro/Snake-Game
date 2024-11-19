@@ -151,14 +151,14 @@
         }
     }
 
-    private async Task GameLoopAsync()
+    private async void GameLoopAsync()
     {
         Console.WriteLine("GameLoopAsync()");
 
         while (networkController.theWorld == null)
         {
             Console.WriteLine("Waiting for the world to be initialized...");
-            await Task.Delay(100); // Wait for 100ms before checking again
+            await Task.Delay(20);
         }
 
         while (true)
@@ -170,8 +170,7 @@
 
             await DrawFrameAsync(snapshot);
 
-            // Control the frame rate, sleep for every iteration of loop
-            Thread.Sleep(20);
+            await Task.Delay(20);
         }
     }
 
