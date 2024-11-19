@@ -37,8 +37,6 @@
     </div>
 </div>
 
-<br />
-
 <!-- Background Image -->
 <div>
     <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
@@ -95,8 +93,6 @@
         {
             connection.Disconnect();
         }
-
-
     }
 
     private async Task NetworkLoop()
@@ -131,13 +127,15 @@
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
 
-    private World drawingCopy;
+    private World snapshot;
     private Point2D head;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            Console.WriteLine("OnAfterRenderAsync(FIRSTRENDER)");
+
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
             this.context = await this.canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
@@ -145,6 +143,7 @@
 
         else if (connection.IsConnected)
         {
+            Console.WriteLine("OnAfterRenderAsync(AFTERFIRSTRENDER)");
             // Start the game loop
             // Dont want to await because OnAfterRenderAsync would never return
             GameLoopAsync();
@@ -153,6 +152,8 @@
 
     private async Task GameLoopAsync()
     {
+        Console.WriteLine("GameLoopAsync()");
+
         while (networkController.theWorld == null)
         {
             Console.WriteLine("Waiting for the world to be initialized...");
@@ -161,14 +162,12 @@
 
         while (true)
         {
-            World snapshot = new World(networkController.theWorld);
             lock (networkController.theWorld)
             {
-                drawingCopy = new(snapshot);
+                snapshot = new(networkController.theWorld);
             }
-            // Create a copy of the world to pass to DrawFrameAsync
 
-            await DrawFrameAsync(drawingCopy);
+            await DrawFrameAsync(snapshot);
 
             // Control the frame rate, sleep for every iteration of loop
             Thread.Sleep(20);
@@ -177,6 +176,8 @@
 
     private async Task DrawFrameAsync(World snapshot)
     {
+        Console.WriteLine("DrawFrameAsync()");
+
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
@@ -185,19 +186,19 @@
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
 
-        Console.WriteLine("Building Snake");
-
-        // Access the snake object based on the player ID
+        Console.WriteLine("Attempting to build Snake");
 
         // Check to see if snake is in the world
         if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake))
         {
+            Console.WriteLine("Snake not yet created");
             return;
         }
 
         // Check to see if snake is initialized
-        if(snake.SnakeBody.Count < 2)
+        if (snake.SnakeBody.Count < 2)
         {
+            Console.WriteLine("Snake still in creation");
             return;
         }
 
@@ -235,35 +236,48 @@
 
     private async Task DrawSnakeAsync(World snapshot)
     {
-        // Set the fill color for the body of the snake (green)
-        await context.SetFillStyleAsync("rgb(0, 255, 0)");
+        Console.WriteLine("DrawSnakeAsync()");
 
-        // Loop through each part of the snake's body
+        // Clear the previous frame (optional, depending on your setup)
+        await context.ClearRectAsync(0, 0, snapshot.WorldSize, snapshot.WorldSize);
+
+        // Set the stroke color to black for drawing the line
+        await context.SetStrokeStyleAsync("rgb(0, 0, 0)");
+        await context.SetLineWidthAsync(10);  // Set the stroke width to 10 pixels
+
+        // Loop through each snake in the snapshot
         foreach (Snake snake in snapshot.Snakes.Values)
         {
-            // Loop through each body part in the snake (body list)
-            for (int i = 0; i < snake.SnakeBody.Count; i++)
+            Console.WriteLine($"Drawing Snake {snake.SnakeID}");
+
+            // Loop through each segment in the snake's body
+            for (int i = 1; i < snake.SnakeBody.Count; i++)  // Start from 1 to avoid a line from the origin point
             {
-                var segment = snake.SnakeBody[i];
+                var currentSegment = snake.SnakeBody[i];
+                var previousSegment = snake.SnakeBody[i - 1];
 
-                // Check if this is the last segment (snake's head)
-                if (i == snake.SnakeBody.Count - 1)
-                {
-                    // Set a different color for the head
-                    await context.SetFillStyleAsync("rgb(255, 0, 0)");  // Red color for the head
-                }
-                else
-                {
-                    // Set the body color (green)
-                    await context.SetFillStyleAsync("rgb(0, 255, 0)");
-                }
-
-                // Draw each segment of the snake as a circle (or square)
+                // Begin a new path for drawing a line
                 await context.BeginPathAsync();
-                await context.ArcAsync(segment.X, segment.Y, 10, 0, 2 * Math.PI);  // Draw circle at (X, Y) with radius 10
-                await context.FillAsync();  // Fill the circle with the current fill style
+
+                // Move to the position of the previous segment
+                await context.MoveToAsync(previousSegment.X, previousSegment.Y);
+
+                // Draw a line to the position of the current segment
+                await context.LineToAsync(currentSegment.X, currentSegment.Y);
+
+                // Apply the stroke to render the line
+                await context.StrokeAsync();
             }
+
+            // Draw a red circle on the head (last segment of the snake)
+            var head = snake.SnakeBody[snake.SnakeBody.Count - 1]; // The head is the last segment
+
+            await context.SetFillStyleAsync("rgb(255, 0, 0)"); // Set color to red
+            await context.BeginPathAsync();
+            await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI); // Draw a circle with a radius of 10
+            await context.FillAsync(); // Fill the circle with the current fill style
         }
+
     }
 
     private async Task DrawWallsAsync(World snapshot)

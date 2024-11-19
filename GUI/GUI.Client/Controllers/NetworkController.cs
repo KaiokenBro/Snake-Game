@@ -9,12 +9,13 @@ namespace GUI.Client.Controllers
     {
 
         private NetworkConnection network;
-        public World theWorld { get; set; }
         private bool receivedID = false;
         private bool receivedSize = false;
         private int worldSize;
         public int playerID;
         private string playerName;
+
+        public World theWorld { get; set; }
 
         public NetworkController(NetworkConnection connection, string playerName)
         {
@@ -62,15 +63,11 @@ namespace GUI.Client.Controllers
                         worldSize = parsedWorldSize;
                         receivedSize = true;
 
-
                         // Now that we have the world size, create a new World instance
-
                         theWorld = new World(worldSize);
 
                         // Create a new Snake for the player
-
                         Snake userSnake = new Snake();
-
 
                         // Set new snakes ID
                         userSnake.SnakeID = playerID;
@@ -78,9 +75,11 @@ namespace GUI.Client.Controllers
                         // Set snakes player name
                         userSnake.PlayerName = playerName;
 
-                        // Add the Snake to the world
-                        theWorld.Snakes[playerID] = userSnake;
-
+                        lock (theWorld)
+                        {
+                            // Add the Snake to the world
+                            theWorld.Snakes[playerID] = userSnake;
+                        }
                     }
                 }
             }
@@ -93,19 +92,16 @@ namespace GUI.Client.Controllers
 
         private void ParseJsonData(string jsonMessage)
         {
-            Console.WriteLine("ParseJsonData()");
-
             try
             {
-
                 // Check if the JSON is for a wall
                 if (jsonMessage.Contains("\"wall\""))
                 {
+                    //Console.WriteLine("ParseJsonData(Wall)");
+
                     // Deserialize the JSON message directly into a Wall object
                     Wall? wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
 
-
-                    /////////////////
                     // Add the wall in the world's dictionary
                     lock (theWorld)
                     {
@@ -116,13 +112,14 @@ namespace GUI.Client.Controllers
                 // Check if the JSON is a powerup
                 if (jsonMessage.Contains("\"power\""))
                 {
+                    //Console.WriteLine("ParseJsonData(Power)");
+
                     // Deserialize the JSON message directly into a powerup object
                     Powerup? powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
-                    /////
+                    // Add the power-up in the world's dictionary
                     lock (theWorld)
                     {
-                        // Add the power-up in the world's dictionary
                         theWorld.Powerups[powerup.PowerupID] = powerup;
                     }
                 }
@@ -130,19 +127,15 @@ namespace GUI.Client.Controllers
                 // Check if the JSON is a snake
                 if (jsonMessage.Contains("\"snake\""))
                 {
+                    //Console.WriteLine("ParseJsonData(Snake)");
+
                     // Deserialize the JSON message directly into a snake object
                     Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
                     if (snake != null)
                     {
-
-                        ////////////////////
                         lock (theWorld)
                         {
-                            if (!theWorld.Snakes.ContainsKey(snake.SnakeID))
-                            {
-                                Console.WriteLine($"New snake received: ID={snake.SnakeID}, Name={snake.PlayerName}");
-                            }
                             theWorld.Snakes[snake.SnakeID] = snake;
                         }
                     }
