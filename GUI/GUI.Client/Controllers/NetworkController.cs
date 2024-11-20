@@ -146,7 +146,7 @@ namespace GUI.Client.Controllers
                         lock (theWorld)
                         {
                             // Remove the snake from the dictionary
-                            theWorld.Powerups.Remove(snake.SnakeID);
+                            theWorld.Snakes.Remove(snake.SnakeID);
                         }
                     }
 
