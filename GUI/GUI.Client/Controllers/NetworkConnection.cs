@@ -127,14 +127,22 @@ namespace GUI.Client.Controllers
         /// <returns> The contents of the message. </returns>
         public string ReadLine()
         {
-            string? message = _reader?.ReadLine();
-
-            if (!IsConnected || message == null)
+            try
             {
-                throw new InvalidOperationException();
+                string message = _reader?.ReadLine();
+
+                if (!IsConnected || message == null)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return message;
+            }
+            catch (Exception)
+            {
+                return null;
             }
 
-            return message;
         }
 
         /// <summary>

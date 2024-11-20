@@ -29,8 +29,12 @@ namespace GUI.Client.Controllers
             {
                 try
                 {
-                    // Asynchronously receive data from the network
                     string message = await Task.Run(() => network.ReadLine());
+
+                    if (message == null)
+                    {
+                        break;
+                    }
 
                     HandleServerData(message);
                 }
@@ -39,6 +43,8 @@ namespace GUI.Client.Controllers
                     break;
                 }
             }
+
+            network.Disconnect();
         }
 
         public void HandleServerData(string message)
