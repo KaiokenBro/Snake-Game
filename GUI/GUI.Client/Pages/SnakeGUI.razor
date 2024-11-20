@@ -227,7 +227,7 @@
         // Predefined list of 8 unique colors for the first 8 players
         string[] uniqueColors = new string[]
         {
-        "rgb(0, 0, 0)",      // Black
+        "rgb(139, 69, 19)",      // Brown
         "rgb(0, 255, 0)",    // Green
         "rgb(0, 0, 255)",    // Blue
         "rgb(255, 255, 0)",  // Yellow
@@ -282,8 +282,21 @@
 
             // Fill the circle with the current fill style (color)
             await context.FillAsync();
+
+            // Draw the player's name and score above the head
+            string displayText = $"{snake.PlayerName} ({snake.PlayerScore})";
+            await DrawTextAsync(displayText, head.X, head.Y - 15); // Position above the head
         }
 
+    }
+
+    // Helper method to draw text on the canvas
+    private async Task DrawTextAsync(string text, int x, int y)
+    {
+        await context.SetFontAsync("20px Arial");         // Set font size and style
+        await context.SetFillStyleAsync("black");         // Set text color
+        await context.SetTextAlignAsync(TextAlign.Center);        // Center the text horizontally
+        await context.FillTextAsync(text, x, y);         // Draw the text
     }
 
     private async Task DrawWallsAsync(World snapshot)
