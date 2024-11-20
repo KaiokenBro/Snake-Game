@@ -113,10 +113,24 @@ namespace GUI.Client.Controllers
                     // Deserialize the JSON message directly into a powerup object
                     Powerup? powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
-                    // Add the power-up in the world's dictionary
-                    lock (theWorld)
+                    // If the powerup died
+                    if (powerup.PowerupDied)
                     {
-                        theWorld.Powerups[powerup.PowerupID] = powerup;
+                        lock (theWorld)
+                        {
+                            // Remove the powerup from the dictionary
+                            theWorld.Powerups.Remove(powerup.PowerupID);
+                        }
+                    }
+
+                    // If the powerup is new or still alive
+                    else if (!powerup.PowerupDied)
+                    {
+                        lock (theWorld)
+                        {
+                            // Add/Update it in the collection
+                            theWorld.Powerups[powerup.PowerupID] = powerup;
+                        }
                     }
                 }
 

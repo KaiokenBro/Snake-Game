@@ -39,6 +39,9 @@
 
 <br />
 
+<!-- Image for Powerup (This will be referenced by ElementReference) -->
+<img id="powerupImage" src="images/powerup.png" style="display:none;" @ref="powerupImage" />
+
 <!-- Background Image -->
 <div>
     <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
@@ -117,6 +120,7 @@
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
     private ElementReference backgroundImage;
+    private ElementReference powerupImage;
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
 
@@ -157,6 +161,8 @@
             }
 
             await DrawFrameAsync(snapshot);
+
+            // Control frame rate 
             await Task.Delay(20);
         }
     }
@@ -260,7 +266,7 @@
 
     private async Task DrawWallsAsync(World snapshot)
     {
-        // Iterate through each wall in the snapshot's walls dictionary
+        // Loop through each wall in the snapshot's walls dictionary
         foreach (Wall wall in snapshot.Walls.Values)
         {
             var p1 = wall.P1;  // Center point of the first segment
@@ -298,29 +304,17 @@
 
     private async Task DrawPowerupsAsync(World snapshot)
     {
-        // Loop through each powerup in the snapshot's collection of powerups
+        // Loop through each powerup in the snapshot's walls dictionary
         foreach (Powerup powerup in snapshot.Powerups.Values)
         {
-            // Set line width for drawing the circle border (if desired)
-            await context.SetLineWidthAsync(5);
-
-            // Set stroke color for the powerup circle
-            await context.SetStrokeStyleAsync("rgb(255, 255, 0)");  // Yellow for the powerup
-
-            // Set fill color for the powerup circle
-            await context.SetFillStyleAsync("rgb(255, 255, 0)");  // Yellow fill
-
-            // Start drawing the path for the powerup (a circle)
-            await context.BeginPathAsync();
-
-            // Draw a circle with 8px radius (16px diameter), centered on the powerup location
-            await context.ArcAsync(powerup.PowerupLocation.X, powerup.PowerupLocation.Y, 8, 0, 2 * Math.PI);
-
-            // Fill the circle
-            await context.FillAsync();
-
-            // Stroke the circle border
-            await context.StrokeAsync();
+            // Draw the powerup image at the specified location on the canvas
+            await context.DrawImageAsync(
+                powerupImage,
+                powerup.PowerupLocation.X - 10,
+                powerup.PowerupLocation.Y - 10,
+                20,
+                20
+            );
         }
     }
 
