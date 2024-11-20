@@ -151,7 +151,7 @@ namespace GUI.Client.Controllers
                     }
 
                     // If the player is connected
-                    else if (!snake.SnakeDied)
+                    else if (snake != null)
                     {
                         lock (theWorld)
                         {
