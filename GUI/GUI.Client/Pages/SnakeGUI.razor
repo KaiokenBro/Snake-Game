@@ -42,6 +42,9 @@
 <!-- Image for Powerup (This will be referenced by ElementReference) -->
 <img id="powerupImage" src="images/powerup.png" style="display:none;" @ref="powerupImage" />
 
+<!-- Image for Wall (This will be referenced by ElementReference) -->
+<img id="wallImage" src="images/WallSprite.png" style="display:none;" @ref="wallImage" />
+
 <!-- Background Image -->
 <div>
     <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
@@ -121,6 +124,7 @@
     private Canvas2DContext context = null!;
     private ElementReference backgroundImage;
     private ElementReference powerupImage;
+    private ElementReference wallImage;
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
 
@@ -266,37 +270,34 @@
 
     private async Task DrawWallsAsync(World snapshot)
     {
-        // Loop through each wall in the snapshot's walls dictionary
+
         foreach (Wall wall in snapshot.Walls.Values)
         {
-            var p1 = wall.P1;  // Center point of the first segment
-            var p2 = wall.P2;  // Center point of the second segment
+            // Calculate the difference in X and Y coordinates for the wall segment
+            int deltaX = wall.P2.X - wall.P1.X;
+            int deltaY = wall.P2.Y - wall.P1.Y;
 
-            // Calculate the difference in X and Y coordinates (using integer math)
-            int deltaX = p2.X - p1.X;
-            int deltaY = p2.Y - p1.Y;
-
-            // Calculate the length of the wall using the distance formula (still using int for simplicity)
+            // Calculate the length of the wall (still using int for simplicity)
             int wallLength = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
-            // Calculate the number of 50x50 pixel segments (rounded to nearest whole number)
-            int numSegments = wallLength / 50;  // Divide the total length by 50 pixels per segment
+            // Calculate the number of 50x50 pixel segments for this wall
+            int numSegments = wallLength / 50;
 
-            // Set the fill style for the wall (color, etc.)
-            await context.SetFillStyleAsync("rgb(0, 0, 0)");  // Solid black walls
-
-            // Set line width for drawing (optional)
-            await context.SetLineWidthAsync(5);  // Optional, can adjust or remove
-
-            // Draw each 50x50 segment
+            // Loop through each wall segment and draw the wall sprite
             for (int i = 0; i < numSegments; i++)
             {
-                // Calculate the position of each segment based on the center points (use int for simplicity)
-                int segmentX = p1.X + (deltaX * i) / numSegments - 25;  // Adjust X to center the segment
-                int segmentY = p1.Y + (deltaY * i) / numSegments - 25;  // Adjust Y to center the segment
+                // Calculate the position of each segment based on the center points
+                int segmentX = wall.P1.X + (deltaX * i) / numSegments - 25;  // Adjust X to center the segment (50px width)
+                int segmentY = wall.P1.Y + (deltaY * i) / numSegments - 25;  // Adjust Y to center the segment (50px height)
 
-                // Draw a solid black 50x50 square at the calculated position
-                await context.FillRectAsync(segmentX, segmentY, 50, 50);  // 50px by 50px segment
+                // Draw the wall sprite image at the calculated position
+                await context.DrawImageAsync(
+                    wallImage,  // Use the ElementReference to the wall sprite image
+                    segmentX,            // X position of the wall segment
+                    segmentY,            // Y position of the wall segment
+                    50,                  // Width of the image (50px)
+                    50                   // Height of the image (50px)
+                );
             }
         }
 
@@ -310,10 +311,10 @@
             // Draw the powerup image at the specified location on the canvas
             await context.DrawImageAsync(
                 powerupImage,
-                powerup.PowerupLocation.X - 10,
-                powerup.PowerupLocation.Y - 10,
-                20,
-                20
+                powerup.PowerupLocation.X - 11,
+                powerup.PowerupLocation.Y - 11,
+                22,
+                22
             );
         }
     }
