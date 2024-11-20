@@ -223,17 +223,34 @@
 
     private async Task DrawSnakeAsync(World snapshot)
     {
-        // Set the stroke color to black for drawing the line
-        await context.SetStrokeStyleAsync("rgb(0, 0, 0)");
 
-        // Set the stroke width to 10 pixels
-        await context.SetLineWidthAsync(10);
+        // Predefined list of 8 unique colors for the first 8 players
+        string[] uniqueColors = new string[]
+        {
+        "rgb(0, 0, 0)",      // Black
+        "rgb(0, 255, 0)",    // Green
+        "rgb(0, 0, 255)",    // Blue
+        "rgb(255, 255, 0)",  // Yellow
+        "rgb(0, 255, 255)",  // Cyan
+        "rgb(255, 0, 255)",  // Magenta
+        "rgb(255, 165, 0)",  // Orange
+        "rgb(128, 0, 128)"   // Purple
+        };
 
         // Loop through each snake in the snapshot's collection of snakes
         foreach (Snake snake in snapshot.Snakes.Values)
         {
+            // Determine the stroke color (red if dead, otherwise cycle through unique colors)
+            string strokeColor = snake.SnakeDied ? "rgb(255, 0, 0)" : uniqueColors[snake.SnakeID % uniqueColors.Length];
+
+            // Set the stroke color for the snake's body
+            await context.SetStrokeStyleAsync(strokeColor);
+
+            // Set the stroke width to 10 pixels for the snake's body
+            await context.SetLineWidthAsync(10);
+
             // Loop through each segment in the snake's body
-            for (int i = 1; i < snake.SnakeBody.Count; i++)  // Start from 1 to avoid a line from the origin point
+            for (int i = 1; i < snake.SnakeBody.Count; i++) // Start from 1 to avoid a line from the origin point
             {
                 var currentSegment = snake.SnakeBody[i];
                 var previousSegment = snake.SnakeBody[i - 1];
@@ -251,18 +268,19 @@
                 await context.StrokeAsync();
             }
 
-            // Draw a red circle on the head (last segment of the snake)
-            var head = snake.SnakeBody[snake.SnakeBody.Count - 1];
+            // Draw a circle on the head (last segment of the snake)
+            var head = snake.SnakeBody[snake.SnakeBody.Count - 1]; // The head is the last segment
 
-            // Set color to red
-            await context.SetFillStyleAsync("rgb(255, 0, 0)");
+            // Set the fill color to red if the snake is dead, or use the same color as the body if alive
+            await context.SetFillStyleAsync(snake.SnakeDied ? "rgb(255, 0, 0)" : strokeColor);  // Red if dead, else the player's color
 
+            // Begin a new path to draw the head as a circle
             await context.BeginPathAsync();
 
-            // Draw a circle with a radius of 10
+            // Draw a circle with a radius of 10 (for the snake's head)
             await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
 
-            // Fill the circle with the current fill style
+            // Fill the circle with the current fill style (color)
             await context.FillAsync();
         }
 
