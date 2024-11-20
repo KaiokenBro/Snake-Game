@@ -13,6 +13,7 @@ namespace GUI.Client.Controllers
         private int worldSize;
         public int playerID;
         private string playerName;
+        private bool commandSentThisFrame = false; // Flag to track if a command was sent in this frame
 
         public World theWorld { get; set; }
 
@@ -168,6 +169,13 @@ namespace GUI.Client.Controllers
 
         public void KeyPressCommand(string key)
         {
+
+            // If a command has already been sent this frame, don't process further
+            if (commandSentThisFrame)
+            {
+                return;
+            }
+
             // Map the key to a movement direction
             string direction = key switch
             {
@@ -185,6 +193,9 @@ namespace GUI.Client.Controllers
 
                 // Send the command to the server
                 SendCommand(command);
+
+                // Set the flag to true to prevent sending more commands in this frame
+                commandSentThisFrame = true;
             }
         }
 
@@ -195,6 +206,12 @@ namespace GUI.Client.Controllers
 
             // Send the JSON command to the server
             network.Send(commandJson);
+        }
+
+        // Reset the commandSentThisFrame flag at the start of the next frame (e.g., in the game loop)
+        public void ResetCommandFlag()
+        {
+            commandSentThisFrame = false;
         }
 
     }

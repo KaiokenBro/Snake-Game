@@ -163,6 +163,8 @@
         // Infinite loop
         while (true)
         {
+            networkController.ResetCommandFlag();
+
             lock (networkController.theWorld)
             {
                 snapshot = new(networkController.theWorld);
