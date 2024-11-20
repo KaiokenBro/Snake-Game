@@ -190,12 +190,31 @@
         await context.TranslateAsync(-viewHead.X, -viewHead.Y);
 
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
-        await DrawSnakeAsync(snapshot);
         await DrawWallsAsync(snapshot);
+        await DrawSnakeAsync(snapshot);
         await DrawPowerupsAsync(snapshot);
 
         await context.RestoreAsync();
         await context.EndBatchAsync();
+    }
+
+    private async Task DrawWallsAsync(World snapshot)
+    {
+        foreach (Wall wall in snapshot.Walls.Values)
+        {
+            int deltaX = wall.P2.X - wall.P1.X;
+            int deltaY = wall.P2.Y - wall.P1.Y;
+            int wallLength = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+            int numSegments = wallLength / 50;
+
+            for (int i = 0; i < numSegments; i++)
+            {
+                int segmentX = wall.P1.X + (deltaX * i) / numSegments - 25;
+                int segmentY = wall.P1.Y + (deltaY * i) / numSegments - 25;
+
+                await context.DrawImageAsync(wallImage, segmentX, segmentY, 50, 50);
+            }
+        }
     }
 
     private async Task DrawSnakeAsync(World snapshot)
@@ -251,25 +270,6 @@
         await context.SetFillStyleAsync("black");
         await context.SetTextAlignAsync(TextAlign.Center);
         await context.FillTextAsync(text, x, y);
-    }
-
-    private async Task DrawWallsAsync(World snapshot)
-    {
-        foreach (Wall wall in snapshot.Walls.Values)
-        {
-            int deltaX = wall.P2.X - wall.P1.X;
-            int deltaY = wall.P2.Y - wall.P1.Y;
-            int wallLength = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-            int numSegments = wallLength / 50;
-
-            for (int i = 0; i < numSegments; i++)
-            {
-                int segmentX = wall.P1.X + (deltaX * i) / numSegments - 25;
-                int segmentY = wall.P1.Y + (deltaY * i) / numSegments - 25;
-
-                await context.DrawImageAsync(wallImage, segmentX, segmentY, 50, 50);
-            }
-        }
     }
 
     private async Task DrawPowerupsAsync(World snapshot)
