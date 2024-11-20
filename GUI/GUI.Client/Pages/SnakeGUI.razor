@@ -39,16 +39,14 @@
 
 <br />
 
-<!-- Image for Powerup (This will be referenced by ElementReference) -->
+<!-- Image for Powerup -->
 <img id="powerupImage" src="images/powerup.png" style="display:none;" @ref="powerupImage" />
 
-<!-- Image for Wall (This will be referenced by ElementReference) -->
+<!-- Image for Wall -->
 <img id="wallImage" src="images/WallSprite.png" style="display:none;" @ref="wallImage" />
 
 <!-- Background Image -->
-<div>
-    <img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
-</div>
+<img @ref="backgroundImage" id="bgImage" src="images/Background.png" alt="image" style="display:none;" />
 
 <!-- Canvas for Game Display -->
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
@@ -61,8 +59,8 @@
 
     private string ServerNameOrAddress = "localhost";
     private int ServerPort = 11000;
-    private NetworkConnection connection = new NetworkConnection();
     private string playerName;
+    private NetworkConnection connection = new NetworkConnection();
     private NetworkController networkController;
 
     private async Task ConnectToServer()
@@ -71,16 +69,10 @@
         {
             try
             {
-                // Establish connection to server
                 connection.Connect(ServerNameOrAddress, ServerPort);
-
-                // Send PlayerName to server
                 connection.Send(playerName);
-
-                // Create a NetworkController using the NetworkConnection instance
                 networkController = new NetworkController(connection, playerName);
 
-                // Start the network loop to continuously receive data
                 await NetworkLoop();
             }
             catch (Exception)
@@ -104,7 +96,6 @@
         {
             try
             {
-                // Start receiving data from the server
                 await networkController.ReceiveFromServerAsync();
             }
             catch (Exception)
@@ -112,6 +103,17 @@
                 break;
             }
         }
+    }
+
+    [JSInvokable]
+    public void HandleKeyPress(string key)
+    {
+        if (!connection.IsConnected)
+        {
+            return;
+        }
+
+        networkController.KeyPressCommand(key);
     }
 
 }
@@ -127,12 +129,11 @@
     private ElementReference wallImage;
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
-    public World snapshot;
-    private Point2D head;
+    private World snapshot;
+    private Point2D viewHead;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // First render
         if (firstRender)
         {
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/SnakeGUI.razor.js");
@@ -140,7 +141,6 @@
             await JsRuntime.InvokeAsync<object>("initRenderJS", DotNetObjectReference.Create(this));
         }
 
-        // Once connection is established
         else if (connection.IsConnected)
         {
             GameLoopAsync();
@@ -149,13 +149,11 @@
 
     private async void GameLoopAsync()
     {
-        // Wait for theWorld to be initialized
         while (networkController.theWorld == null)
         {
             await Task.Delay(20);
         }
 
-        // Infinite loop
         while (true)
         {
             networkController.ResetCommandFlag();
@@ -166,126 +164,82 @@
             }
 
             await DrawFrameAsync(snapshot);
-
-            // Control frame rate 
             await Task.Delay(20);
         }
     }
 
     private async Task DrawFrameAsync(World snapshot)
     {
-        // Batch the drawing calls for better performance
         await context.BeginBatchAsync();
-
-        // Clear the previous frame
         await context.ClearRectAsync(0, 0, snapshot.WorldSize, snapshot.WorldSize);
-
         await context.SetFillStyleAsync("lightblue");
         await context.FillRectAsync(0, 0, 1000, 1000);
-
-        // Clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, viewSize, viewSize);
         await context.ClipAsync();
-
-        // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
 
-        // Check if the snake exists and is initialized
         if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake) || snake.SnakeBody.Count < 2)
         {
             return;
         }
 
-        // Get the loaction of the snakes head
-        head = snake.SnakeBody[1];
+        viewHead = snake.SnakeBody[snake.SnakeBody.Count - 1];
 
-        // Center on origin, move to center of view port
         await context.TranslateAsync(viewSize / 2, viewSize / 2);
-        await context.TranslateAsync(-head.X, -head.Y);
+        await context.TranslateAsync(-viewHead.X, -viewHead.Y);
 
-        // Draw the background
         await context.DrawImageAsync(backgroundImage, -snapshot.WorldSize / 2, -snapshot.WorldSize / 2, snapshot.WorldSize, snapshot.WorldSize);
-
-        // Draw the snakes
         await DrawSnakeAsync(snapshot);
-
-        // Draw the walls
         await DrawWallsAsync(snapshot);
-
-        // Draw the powerups
         await DrawPowerupsAsync(snapshot);
 
         await context.RestoreAsync();
-
-        // Finish batch drawing
         await context.EndBatchAsync();
     }
 
     private async Task DrawSnakeAsync(World snapshot)
     {
-        // Predefined list of 8 unique colors for the first 8 players
         string[] uniqueColors = new string[]
         {
-        "rgb(139, 69, 19)",      // Brown
-        "rgb(0, 255, 0)",    // Green
-        "rgb(0, 0, 255)",    // Blue
-        "rgb(255, 255, 0)",  // Yellow
-        "rgb(0, 255, 255)",  // Cyan
-        "rgb(255, 0, 255)",  // Magenta
-        "rgb(255, 165, 0)",  // Orange
-        "rgb(128, 0, 128)"   // Purple
+        "rgb(139, 69, 19)",     // Brown
+        "rgb(0, 255, 0)",       // Green
+        "rgb(0, 0, 255)",       // Blue
+        "rgb(255, 255, 0)",     // Yellow
+        "rgb(0, 255, 255)",     // Cyan
+        "rgb(255, 0, 255)",     // Magenta
+        "rgb(255, 165, 0)",     // Orange
+        "rgb(128, 0, 128)"      // Purple
         };
 
-        // Loop through each snake in the snapshot's collection of snakes
         foreach (Snake snake in snapshot.Snakes.Values)
         {
-            // Determine the stroke color (red if dead, otherwise cycle through unique colors)
             string strokeColor = snake.SnakeDied ? "rgb(255, 0, 0)" : uniqueColors[snake.SnakeID % uniqueColors.Length];
 
-            // Set the stroke color for the snake's body
             await context.SetStrokeStyleAsync(strokeColor);
-
-            // Set the stroke width to 10 pixels for the snake's body
             await context.SetLineWidthAsync(10);
 
-            // Loop through each segment in the snake's body
-            for (int i = 1; i < snake.SnakeBody.Count; i++) // Start from 1 to avoid a line from the origin point
+            for (int i = 1; i < snake.SnakeBody.Count; i++)
             {
                 var currentSegment = snake.SnakeBody[i];
                 var previousSegment = snake.SnakeBody[i - 1];
 
-                // Begin a new path for drawing a line
                 await context.BeginPathAsync();
-
-                // Move to the position of the previous segment
                 await context.MoveToAsync(previousSegment.X, previousSegment.Y);
-
-                // Draw a line to the position of the current segment
                 await context.LineToAsync(currentSegment.X, currentSegment.Y);
-
-                // Apply the stroke to render the line
                 await context.StrokeAsync();
             }
 
-            // Draw a circle on the head (last segment of the snake)
-            var head = snake.SnakeBody[snake.SnakeBody.Count - 1]; // The head is the last segment
+            var head = snake.SnakeBody[snake.SnakeBody.Count - 1];
 
-            // Set the fill color to red if the snake is dead, or use the same color as the body if alive
-            await context.SetFillStyleAsync(snake.SnakeDied ? "rgb(255, 0, 0)" : strokeColor);  // Red if dead, else the player's color
-
-            // Begin a new path to draw the head as a circle
+            await context.SetFillStyleAsync(snake.SnakeDied ? "rgb(255, 0, 0)" : strokeColor);
             await context.BeginPathAsync();
-
-            // Draw a circle with a radius of 10 (for the snake's head)
             await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
-
-            // Fill the circle with the current fill style (color)
             await context.FillAsync();
 
-            // Draw the player's name and score above the head
             string displayText = $"{snake.PlayerName} ({snake.PlayerScore})";
-            await DrawTextAsync(displayText, head.X, head.Y - 15); // Position above the head
+
+            await DrawTextAsync(displayText, head.X, head.Y - 15);
         }
 
     }
@@ -293,41 +247,27 @@
     // Helper method to draw text on the canvas
     private async Task DrawTextAsync(string text, int x, int y)
     {
-        await context.SetFontAsync("20px Arial");         // Set font size and style
-        await context.SetFillStyleAsync("black");         // Set text color
-        await context.SetTextAlignAsync(TextAlign.Center);        // Center the text horizontally
-        await context.FillTextAsync(text, x, y);         // Draw the text
+        await context.SetFontAsync("20px Arial");
+        await context.SetFillStyleAsync("black");
+        await context.SetTextAlignAsync(TextAlign.Center);
+        await context.FillTextAsync(text, x, y);
     }
 
     private async Task DrawWallsAsync(World snapshot)
     {
         foreach (Wall wall in snapshot.Walls.Values)
         {
-            // Calculate the difference in X and Y coordinates for the wall segment
             int deltaX = wall.P2.X - wall.P1.X;
             int deltaY = wall.P2.Y - wall.P1.Y;
-
-            // Calculate the length of the wall (still using int for simplicity)
             int wallLength = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
-            // Calculate the number of 50x50 pixel segments for this wall
             int numSegments = wallLength / 50;
 
-            // Loop through each wall segment and draw the wall sprite
             for (int i = 0; i < numSegments; i++)
             {
-                // Calculate the position of each segment based on the center points
-                int segmentX = wall.P1.X + (deltaX * i) / numSegments - 25;  // Adjust X to center the segment (50px width)
-                int segmentY = wall.P1.Y + (deltaY * i) / numSegments - 25;  // Adjust Y to center the segment (50px height)
+                int segmentX = wall.P1.X + (deltaX * i) / numSegments - 25;
+                int segmentY = wall.P1.Y + (deltaY * i) / numSegments - 25;
 
-                // Draw the wall sprite image at the calculated position
-                await context.DrawImageAsync(
-                    wallImage,  // Use the ElementReference to the wall sprite image
-                    segmentX,            // X position of the wall segment
-                    segmentY,            // Y position of the wall segment
-                    50,                  // Width of the image (50px)
-                    50                   // Height of the image (50px)
-                );
+                await context.DrawImageAsync(wallImage, segmentX, segmentY, 50, 50);
             }
         }
     }
@@ -336,33 +276,8 @@
     {
         foreach (Powerup powerup in snapshot.Powerups.Values)
         {
-            // Draw the powerup image at the specified location on the canvas
-            await context.DrawImageAsync(
-                powerupImage,
-                powerup.PowerupLocation.X - 11,
-                powerup.PowerupLocation.Y - 11,
-                22,
-                22
-            );
+            await context.DrawImageAsync(powerupImage, powerup.PowerupLocation.X - 11, powerup.PowerupLocation.Y - 11, 22, 22);
         }
-    }
-
-}
-
-<!-- User Input -->
-@code
-{
-
-    [JSInvokable]
-    public void HandleKeyPress(string key)
-    {
-        // Only works if IsConnected
-        if (!connection.IsConnected)
-        {
-            return;
-        }
-
-        networkController.KeyPressCommand(key);
     }
 
 }
