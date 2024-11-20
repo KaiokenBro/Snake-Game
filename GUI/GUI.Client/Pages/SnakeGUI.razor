@@ -17,7 +17,7 @@
     <div class="input-row">
 
         <label for="playerName">Player Name: </label>
-        <input id="playerName" type="text" @bind="playerName" disabled="@connection.IsConnected" />
+        <input id="playerName" maxlength="16" type="text" @bind="playerName" disabled="@connection.IsConnected" />
 
         <label for="ServerNameOrAddress">Server Address: </label>
         <input id="ServerNameOrAddress" type="text" @bind="ServerNameOrAddress" disabled="@connection.IsConnected" />
@@ -55,7 +55,12 @@
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
 </div>
 
-<!-- Connection -->
+<!-- Scoreboard -->
+<div>
+
+</div>
+
+<!-- Connection / Network -->
 @code
 {
 
@@ -127,7 +132,6 @@
     private ElementReference wallImage;
     private IJSObjectReference jsModule = null!;
     private const int viewSize = 1000;
-
     public World snapshot;
     private Point2D head;
 
@@ -223,7 +227,6 @@
 
     private async Task DrawSnakeAsync(World snapshot)
     {
-
         // Predefined list of 8 unique colors for the first 8 players
         string[] uniqueColors = new string[]
         {
@@ -288,7 +291,6 @@
 
     private async Task DrawWallsAsync(World snapshot)
     {
-
         foreach (Wall wall in snapshot.Walls.Values)
         {
             // Calculate the difference in X and Y coordinates for the wall segment
@@ -318,12 +320,10 @@
                 );
             }
         }
-
     }
 
     private async Task DrawPowerupsAsync(World snapshot)
     {
-        // Loop through each powerup in the snapshot's walls dictionary
         foreach (Powerup powerup in snapshot.Powerups.Values)
         {
             // Draw the powerup image at the specified location on the canvas

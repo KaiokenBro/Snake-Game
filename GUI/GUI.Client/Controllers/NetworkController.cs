@@ -7,7 +7,6 @@ namespace GUI.Client.Controllers
 
     public class NetworkController
     {
-
         private NetworkConnection network;
         private bool receivedID = false;
         private bool receivedSize = false;
@@ -140,10 +139,22 @@ namespace GUI.Client.Controllers
                     // Deserialize the JSON message directly into a snake object
                     Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
-                    if (snake != null)
+                    // If the player disconnected
+                    if (snake.PlayerDisconnected)
                     {
                         lock (theWorld)
                         {
+                            // Remove the snake from the dictionary
+                            theWorld.Powerups.Remove(snake.SnakeID);
+                        }
+                    }
+
+                    // If the player is connected
+                    else if (!snake.SnakeDied)
+                    {
+                        lock (theWorld)
+                        {
+                            // Add/Update it in the collection
                             theWorld.Snakes[snake.SnakeID] = snake;
                         }
                     }
