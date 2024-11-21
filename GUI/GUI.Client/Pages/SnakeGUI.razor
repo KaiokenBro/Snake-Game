@@ -63,6 +63,10 @@
     private NetworkConnection connection = new NetworkConnection();
     private NetworkController networkController;
 
+    /// <summary>
+    /// A method to be used when the user clicks connect, to connect to the server.
+    /// </summary>
+    /// <returns></returns>
     private async Task ConnectToServer()
     {
         if (!connection.IsConnected)
@@ -82,6 +86,9 @@
         }
     }
 
+    /// <summary>
+    /// Method to be used disdconect from teh server when a user clicks disconnect.
+    /// </summary>
     private void DisconnectFromServer()
     {
         if (connection.IsConnected)
@@ -90,6 +97,10 @@
         }
     }
 
+    /// <summary>
+    /// Method to start the network library.
+    /// </summary>
+    /// <returns></returns>
     private async Task NetworkLoop()
     {
         while (connection.IsConnected)
@@ -105,6 +116,10 @@
         }
     }
 
+    /// <summary>
+    /// Method handler to send user inputs to the server.
+    /// </summary>
+    /// <param name="key">Key that was pressed</param>
     [JSInvokable]
     public void HandleKeyPress(string key)
     {
@@ -132,6 +147,12 @@
     private World snapshot;
     private Point2D viewHead;
 
+    /// <summary>
+    /// Called after the page is rendered. We use this to know when the first page load
+    /// has occurred so we can initialize various data and start the server and drawing loops
+    /// </summary>
+    /// <param name="firstRender">First render of the view</param>
+    /// <returns></returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -147,6 +168,9 @@
         }
     }
 
+    /// <summary>
+    /// Renders the view once every 20 milliseconds (50 frames/second)
+    /// </summary>
     private async void GameLoopAsync()
     {
         while (networkController.theWorld == null)
@@ -168,6 +192,11 @@
         }
     }
 
+    /// <summary>
+    /// Draws a frame of the current state of the world with all needed objects (snakes, walls, powerups, background).
+    /// </summary>
+    /// <param name="snapshot">Snapshot of the world</param>
+    /// <returns></returns>
     private async Task DrawFrameAsync(World snapshot)
     {
         await context.BeginBatchAsync();
@@ -198,6 +227,11 @@
         await context.EndBatchAsync();
     }
 
+    /// <summary>
+    /// Helper method to draw the specific walls given from the server.
+    /// </summary>
+    /// <param name="snapshot">Snapshot of the world</param>
+    /// <returns></returns>
     private async Task DrawWallsAsync(World snapshot)
     {
         foreach (Wall wall in snapshot.Walls.Values)
@@ -219,6 +253,11 @@
         }
     }
 
+    /// <summary>
+    /// Helper method to draw the specific snakes in the world and maintains sizes and colors sent from the world snapshot.
+    /// </summary>
+    /// <param name="snapshot">Snapshot of the world</param>
+    /// <returns></returns>
     private async Task DrawSnakeAsync(World snapshot)
     {
         string[] uniqueColors = new string[]
@@ -258,14 +297,20 @@
             await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
             await context.FillAsync();
 
-            string displayText = $"{snake.PlayerName} ({snake.PlayerScore})";
+            string displayText = $"{snake.PlayerName} : {snake.PlayerScore}";
 
             await DrawTextAsync(displayText, head.X, head.Y - 15);
         }
 
     }
 
-    // Helper method to draw text on the canvas
+    /// <summary>
+    /// Helper method to draw text on the canvas.
+    /// </summary>
+    /// <param name="text">Test to represent</param>
+    /// <param name="x">x location</param>
+    /// <param name="y">y location</param>
+    /// <returns></returns>
     private async Task DrawTextAsync(string text, int x, int y)
     {
         await context.SetFontAsync("20px Arial");
@@ -274,6 +319,11 @@
         await context.FillTextAsync(text, x, y);
     }
 
+    /// <summary>
+    /// Helper method to draw the powerups in the world.
+    /// </summary>
+    /// <param name="snapshot">Snapshot of the world</param>
+    /// <returns></returns>
     private async Task DrawPowerupsAsync(World snapshot)
     {
         foreach (Powerup powerup in snapshot.Powerups.Values)

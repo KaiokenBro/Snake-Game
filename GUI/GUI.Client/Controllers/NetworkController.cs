@@ -53,7 +53,7 @@ namespace GUI.Client.Controllers
         ///     Represents the current state of the game world.
         ///     This is populated with data received from the server.
         /// </summary>
-        public World theWorld { get; private set; }
+        public World? theWorld { get; private set; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="NetworkController"/> class.
