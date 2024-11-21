@@ -1,4 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿/// Name: Harrison Doppelt and Victor Valdez Landa
+/// Date: 11/20/2024
+
+using System.Text.Json.Serialization;
 
 namespace GUI.Client.Models
 {
@@ -9,11 +12,11 @@ namespace GUI.Client.Models
     {
         /// <summary>
         ///     Property that gets or sets the direction in which the player wants the snake to move.
-        ///     Possible values are "none", "up", "left", "down", or "right".
+        ///     Possible values are "up", "left", "down", or "right".
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("moving")]
-        public string Moving { get; set; }
+        public string Moving { get; private set; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ControlCommand"/> class
@@ -23,14 +26,6 @@ namespace GUI.Client.Models
         public ControlCommand(string direction)
         {
             Moving = direction;
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ControlCommand"/> class.
-        ///     Used for JSON deserialization.
-        /// </summary>
-        public ControlCommand() 
-        { 
         }
     }
 }

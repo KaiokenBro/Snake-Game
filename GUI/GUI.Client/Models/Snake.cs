@@ -1,4 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿/// Name: Harrison Doppelt and Victor Valdez Landa
+/// Date: 11/20/2024
+
+using System.Text.Json.Serialization;
 
 namespace GUI.Client.Models
 {
@@ -12,63 +15,63 @@ namespace GUI.Client.Models
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("name")]
-        public string PlayerName { get; set; }
+        public string PlayerName { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets the player's score, representing the number of powerups collected.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("score")]
-        public int PlayerScore { get; set; }
+        public int PlayerScore { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the player joined on this frame.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("join")]
-        public bool PlayerJoined { get; set; }
+        public bool PlayerJoined { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the player disconnected on this frame.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("dc")]
-        public bool PlayerDisconnected { get; set; }
+        public bool PlayerDisconnected { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets the unique ID of the snake.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("snake")]
-        public int SnakeID { get; set; }
+        public int SnakeID { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets the body of the snake as a list of <see cref="Point2D"/> representing the segments.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("body")]
-        public List<Point2D> SnakeBody { get; set; }
+        public List<Point2D> SnakeBody { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets the direction of the snake.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("dir")]
-        public Point2D SnakeDirection { get; set; }
+        public Point2D SnakeDirection { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the snake is alive.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("alive")]
-        public bool SnakeAlive { get; set; }
+        public bool SnakeAlive { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the snake died on this frame.
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("died")]
-        public bool SnakeDied { get; set; }
+        public bool SnakeDied { get; private set; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Snake"/> class.
@@ -77,6 +80,24 @@ namespace GUI.Client.Models
         public Snake()
         {
             SnakeBody = new List<Point2D>();
+        }
+
+        /// <summary>
+        ///     Updates the name of the player controlling the snake.
+        /// </summary>
+        /// <param name="playerName">The name of the player to be set.</param>
+        public void SetPlayerName(string playerName)
+        {
+            PlayerName = playerName;
+        }
+
+        /// <summary>
+        ///     Assigns a unique identifier to the snake.
+        /// </summary>
+        /// <param name="snakeID">The unique ID of the snake to be set.</param>
+        public void SetSnakeID(int snakeID)
+        {
+            SnakeID = snakeID;
         }
     }
 }

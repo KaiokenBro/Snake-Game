@@ -1,28 +1,76 @@
-﻿using GUI.Client.Models;
+﻿/// Name: Harrison Doppelt and Victor Valdez Landa
+/// Date: 11/20/2024
+
+using GUI.Client.Models;
 using System.Data.Common;
 using System.Text.Json;
 
 namespace GUI.Client.Controllers
 {
-
+    /// <summary>
+    ///     Manages communication between the client and the server for the snake game.
+    ///     Handles network operations such as sending and receiving messages,
+    ///     maintaining the game world, and processing server data.
+    /// </summary>
     public class NetworkController
     {
+        /// <summary>
+        ///     Represents the network connection used for communication with the server.
+        /// </summary>
         private NetworkConnection network;
+
+        /// <summary>
+        ///     Indicates whether the player ID has been received from the server.
+        /// </summary>
         private bool receivedID = false;
+
+        /// <summary>
+        ///     Indicates whether the world size has been received from the server.
+        /// </summary>
         private bool receivedSize = false;
+
+        /// <summary>
+        ///     Stores the size of the game world, as specified by the server.
+        /// </summary>
         private int worldSize;
-        public int playerID;
+
+        /// <summary>
+        ///     Stores the unique ID assigned to the player by the server.
+        /// </summary>
+        public int playerID { get; private set; }
+
+        /// <summary>
+        ///     Stores the player's name, as specified during initialization.
+        /// </summary>
         private string playerName;
+
+        /// <summary>
+        ///     Indicates whether a command has been sent to the server during the current frame.
+        /// </summary>
         private bool commandSentThisFrame = false;
 
-        public World theWorld { get; set; }
+        /// <summary>
+        ///     Represents the current state of the game world.
+        ///     This is populated with data received from the server.
+        /// </summary>
+        public World theWorld { get; private set; }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="NetworkController"/> class.
+        /// </summary>
+        /// <param name="connection">The network connection used to communicate with the server.</param>
+        /// <param name="playerName">The name of the player to associate with this controller.</param>
         public NetworkController(NetworkConnection connection, string playerName)
         {
             this.network = connection;
             this.playerName = playerName;
         }
 
+        /// <summary>
+        ///     Continuously receives data from the server while the connection is active.
+        ///     Processes each message received by delegating to the <see cref="HandleServerData(string)"/> method.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task ReceiveFromServerAsync()
         {
             while (network.IsConnected)
@@ -47,7 +95,15 @@ namespace GUI.Client.Controllers
             network.Disconnect();
         }
 
-        public void HandleServerData(string message)
+        /// <summary>
+        ///     Processes data received from the server to initialize the game state or update existing information.
+        /// </summary>
+        /// <param name="message">The message received from the server as a string.</param>
+        /// <remarks>
+        ///     This method handles initial data reception, such as player ID and world size, and delegates further JSON processing
+        ///     to <see cref="ParseJsonData(string)"/> for additional updates.
+        /// </remarks>
+        private void HandleServerData(string message)
         {
             if (!receivedID || !receivedSize)
             {
@@ -68,8 +124,9 @@ namespace GUI.Client.Controllers
 
                         theWorld = new World(worldSize);
                         Snake userSnake = new Snake();
-                        userSnake.SnakeID = playerID;
-                        userSnake.PlayerName = playerName;
+
+                        userSnake.SetPlayerName(playerName);
+                        userSnake.SetSnakeID(playerID);
 
                         lock (theWorld)
                         {
@@ -85,6 +142,15 @@ namespace GUI.Client.Controllers
             }
         }
 
+        /// <summary>
+        ///     Parses a JSON message from the server and updates the game world accordingly.
+        /// </summary>
+        /// <param name="jsonMessage">The JSON-formatted message received from the server.</param>
+        /// <remarks>
+        ///     This method processes different types of game objects (e.g., walls, powerups, snakes)
+        ///     based on the contents of the JSON message. It updates the game world by deserializing
+        ///     the data and modifying the appropriate collections in a thread-safe manner.
+        /// </remarks>
         private void ParseJsonData(string jsonMessage)
         {
             try
@@ -145,9 +211,16 @@ namespace GUI.Client.Controllers
             }
         }
 
+        /// <summary>
+        ///     Handles a key press from the user and sends a corresponding control command to the server.
+        /// </summary>
+        /// <param name="key">The key pressed by the user, representing a direction (e.g., "w", "a", "s", "d").</param>
+        /// <remarks>
+        ///     This method maps the key to a direction, creates a <see cref="ControlCommand"/> object, and sends it to the server.
+        ///     It ensures that only one command is sent per frame by using the <c>commandSentThisFrame</c> flag.
+        /// </remarks>
         public void KeyPressCommand(string key)
         {
-
             if (commandSentThisFrame)
             {
                 return;
@@ -169,13 +242,27 @@ namespace GUI.Client.Controllers
             }
         }
 
+        /// <summary>
+        ///     Sends a serialized control command to the server.
+        /// </summary>
+        /// <param name="command">The control command containing the player's input (direction).</param>
+        /// <remarks>
+        ///     This method serializes the <see cref="ControlCommand"/> object into JSON
+        ///     and sends it to the server using the network connection.
+        /// </remarks>
         private void SendCommand(ControlCommand command)
         {
             string commandJson = JsonSerializer.Serialize(command);
             network.Send(commandJson);
         }
 
-        // Reset the commandSentThisFrame flag at the start of the next frame (e.g., in the game loop)
+        /// <summary>
+        ///     Resets the <c>commandSentThisFrame</c> flag, allowing new commands to be sent in the next frame.
+        /// </summary>
+        /// <remarks>
+        ///     This method is called at the start of each game loop frame to ensure the player
+        ///     can send new commands in subsequent frames.
+        /// </remarks>
         public void ResetCommandFlag()
         {
             commandSentThisFrame = false;

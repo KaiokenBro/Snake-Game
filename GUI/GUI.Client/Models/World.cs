@@ -1,4 +1,7 @@
-﻿using System.Drawing;
+﻿/// Name: Harrison Doppelt and Victor Valdez Landa
+/// Date: 11/20/2024
+
+using System.Drawing;
 using System.Numerics;
 
 namespace GUI.Client.Models
@@ -11,22 +14,22 @@ namespace GUI.Client.Models
         /// <summary>
         ///     Collection of all snakes in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Snake> Snakes { get; set; }
+        public Dictionary<int, Snake> Snakes { get; private set; }
 
         /// <summary>
         ///     Collection of all walls in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Wall> Walls { get; set; }
+        public Dictionary<int, Wall> Walls { get; private set; }
 
         /// <summary>
         ///     Collection of all powerups in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Powerup> Powerups { get; set; }
+        public Dictionary<int, Powerup> Powerups { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets the size of the world (width and height).
         /// </summary>
-        public int WorldSize { get; set; }
+        public int WorldSize { get; private set; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="World"/> class with the specified world size.
