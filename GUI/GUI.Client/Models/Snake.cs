@@ -1,5 +1,5 @@
-﻿/// Name: Harrison Doppelt and Victor Valdez Landa
-/// Date: 11/20/2024
+﻿// Name: Harrison Doppelt and Victor Valdez Landa
+// Date: 11/20/2024
 
 using System.Text.Json.Serialization;
 
@@ -15,7 +15,7 @@ namespace GUI.Client.Models
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("name")]
-        public string PlayerName { get; private set; }
+        public string? PlayerName { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets the player's score, representing the number of powerups collected.
@@ -57,7 +57,7 @@ namespace GUI.Client.Models
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("dir")]
-        public Point2D SnakeDirection { get; private set; }
+        public Point2D? SnakeDirection { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the snake is alive.

@@ -1,5 +1,5 @@
-﻿/// Name: Harrison Doppelt and Victor Valdez Landa
-/// Date: 11/20/2024
+﻿// Name: Harrison Doppelt and Victor Valdez Landa
+// Date: 11/20/2024
 
 using System.Text.Json.Serialization;
 
@@ -22,7 +22,7 @@ namespace GUI.Client.Models
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("loc")]
-        public Point2D PowerupLocation { get; private set; }
+        public Point2D? PowerupLocation { get; private set; }
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the powerup was collected (died) on this frame.

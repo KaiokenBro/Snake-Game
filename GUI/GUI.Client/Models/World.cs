@@ -1,5 +1,5 @@
-﻿/// Name: Harrison Doppelt and Victor Valdez Landa
-/// Date: 11/20/2024
+﻿// Name: Harrison Doppelt and Victor Valdez Landa
+// Date: 11/20/2024
 
 using System.Drawing;
 using System.Numerics;
@@ -46,7 +46,7 @@ namespace GUI.Client.Models
         /// <summary>
         ///     Shallow copy constructor.
         /// </summary>
-        /// <param name="world"></param>
+        /// <param name="other"></param>
         public World(World other)
         {
             WorldSize = other.WorldSize;

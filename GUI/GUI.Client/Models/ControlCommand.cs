@@ -1,5 +1,5 @@
-﻿/// Name: Harrison Doppelt and Victor Valdez Landa
-/// Date: 11/20/2024
+﻿// Name: Harrison Doppelt and Victor Valdez Landa
+// Date: 11/20/2024
 
 using System.Text.Json.Serialization;
 

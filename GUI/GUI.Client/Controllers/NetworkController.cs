@@ -1,5 +1,5 @@
-﻿/// Name: Harrison Doppelt and Victor Valdez Landa
-/// Date: 11/20/2024
+﻿// Name: Harrison Doppelt and Victor Valdez Landa
+// Date: 11/20/2024
 
 using GUI.Client.Models;
 using System.Data.Common;
@@ -159,9 +159,12 @@ namespace GUI.Client.Controllers
                 {
                     Wall? wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
 
-                    lock (theWorld)
+                    if (wall != null && theWorld?.Walls != null)
                     {
-                        theWorld.Walls[wall.WallID] = wall;
+                        lock (theWorld)
+                        {
+                            theWorld.Walls[wall.WallID] = wall;
+                        }
                     }
                 }
 
@@ -169,18 +172,21 @@ namespace GUI.Client.Controllers
                 {
                     Powerup? powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
-                    if (powerup.PowerupDied)
+                    if (powerup != null && theWorld?.Powerups != null)
                     {
-                        lock (theWorld)
+                        if (powerup.PowerupDied)
                         {
-                            theWorld.Powerups.Remove(powerup.PowerupID);
+                            lock (theWorld)
+                            {
+                                theWorld.Powerups.Remove(powerup.PowerupID);
+                            }
                         }
-                    }
-                    else if (!powerup.PowerupDied)
-                    {
-                        lock (theWorld)
+                        else
                         {
-                            theWorld.Powerups[powerup.PowerupID] = powerup;
+                            lock (theWorld)
+                            {
+                                theWorld.Powerups[powerup.PowerupID] = powerup;
+                            }
                         }
                     }
                 }
@@ -189,18 +195,21 @@ namespace GUI.Client.Controllers
                 {
                     Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
-                    if (snake.PlayerDisconnected)
+                    if (snake != null && theWorld?.Snakes != null)
                     {
-                        lock (theWorld)
+                        if (snake.PlayerDisconnected)
                         {
-                            theWorld.Snakes.Remove(snake.SnakeID);
+                            lock (theWorld)
+                            {
+                                theWorld.Snakes.Remove(snake.SnakeID);
+                            }
                         }
-                    }
-                    else if (snake != null)
-                    {
-                        lock (theWorld)
+                        else
                         {
-                            theWorld.Snakes[snake.SnakeID] = snake;
+                            lock (theWorld)
+                            {
+                                theWorld.Snakes[snake.SnakeID] = snake;
+                            }
                         }
                     }
                 }
