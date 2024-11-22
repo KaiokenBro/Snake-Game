@@ -115,7 +115,7 @@
                 connection.Send(playerName);
                 networkController = new NetworkController(connection, playerName);
 
-                await NetworkLoop();
+                await networkController.NetworkLoop(networkController);
             }
             catch (Exception)
             {
@@ -148,32 +148,6 @@
         if (connection.IsConnected)
         {
             connection.Disconnect();
-        }
-    }
-
-    /// <summary>
-    ///     Continuously listens for messages from the server and processes them.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task NetworkLoop()
-    {
-        while (connection.IsConnected)
-        {
-            try
-            {
-                if (networkController != null)
-                {
-                    await networkController.ReceiveFromServerAsync();
-                }
-                else
-                {
-                    break;
-                }
-            }
-            catch (Exception)
-            {
-                break;
-            }
         }
     }
 

@@ -56,6 +56,32 @@ namespace GUI.Client.Controllers
         public World? TheWorld { get; private set; }
 
         /// <summary>
+        ///     Continuously listens for messages from the server and processes them.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task NetworkLoop(NetworkController networkController)
+        {
+            while (network.IsConnected)
+            {
+                try
+                {
+                    if (networkController != null)
+                    {
+                        await ReceiveFromServerAsync();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
         ///     Continuously receives data from the server while the connection is active.
         ///     Processes each message received by delegating to the <see cref="HandleServerData(string)"/> method.
         /// </summary>
