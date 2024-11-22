@@ -14,17 +14,17 @@ namespace GUI.Client.Models
         /// <summary>
         ///     Collection of all snakes in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Snake> Snakes { get; private set; }
+        public Dictionary<int, Snake> Snakes { get; private set; } = [];
 
         /// <summary>
         ///     Collection of all walls in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Wall> Walls { get; private set; }
+        public Dictionary<int, Wall> Walls { get; private set; } = [];
 
         /// <summary>
         ///     Collection of all powerups in the world, keyed by their unique IDs.
         /// </summary>
-        public Dictionary<int, Powerup> Powerups { get; private set; }
+        public Dictionary<int, Powerup> Powerups { get; private set; } = [];
 
         /// <summary>
         ///     Property that gets or sets the size of the world (width and height).
@@ -38,9 +38,6 @@ namespace GUI.Client.Models
         public World(int worldSize)
         {
             this.WorldSize = worldSize;
-            this.Snakes = new Dictionary<int, Snake>();
-            this.Walls = new Dictionary<int, Wall>();
-            this.Powerups = new Dictionary<int, Powerup>();
         }
 
         /// <summary>

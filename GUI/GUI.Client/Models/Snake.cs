@@ -50,7 +50,7 @@ namespace GUI.Client.Models
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("body")]
-        public List<Point2D> SnakeBody { get; private set; }
+        public List<Point2D> SnakeBody { get; private set; } = [];
 
         /// <summary>
         ///     Property that gets or sets the direction of the snake.
@@ -77,10 +77,7 @@ namespace GUI.Client.Models
         ///     Initializes a new instance of the <see cref="Snake"/> class.
         ///     Used for JSON deserialization.
         /// </summary>
-        public Snake()
-        {
-            SnakeBody = new List<Point2D>();
-        }
+        public Snake() { }
 
         /// <summary>
         ///     Updates the name of the player controlling the snake.

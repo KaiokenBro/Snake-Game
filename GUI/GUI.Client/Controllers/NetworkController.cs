@@ -8,16 +8,16 @@ using System.Text.Json;
 namespace GUI.Client.Controllers
 {
     /// <summary>
-    ///     Manages communication between the client and the server for the snake game.
-    ///     Handles network operations such as sending and receiving messages,
-    ///     maintaining the game world, and processing server data.
+    ///     Manages communication between the client and the server, maintaining the game state and processing server data.
     /// </summary>
-    public class NetworkController
+    /// <param name="connection">The network connection used to communicate with the server.</param>
+    /// <param name="playerName">The name of the player to associate with this controller.</param>
+    public class NetworkController(NetworkConnection connection, string playerName)
     {
         /// <summary>
         ///     Represents the network connection used for communication with the server.
         /// </summary>
-        private NetworkConnection network;
+        private readonly NetworkConnection network = connection;
 
         /// <summary>
         ///     Indicates whether the player ID has been received from the server.
@@ -37,12 +37,12 @@ namespace GUI.Client.Controllers
         /// <summary>
         ///     Stores the unique ID assigned to the player by the server.
         /// </summary>
-        public int playerID { get; private set; }
+        public int PlayerID { get; private set; }
 
         /// <summary>
         ///     Stores the player's name, as specified during initialization.
         /// </summary>
-        private string playerName;
+        private readonly string playerName = playerName;
 
         /// <summary>
         ///     Indicates whether a command has been sent to the server during the current frame.
@@ -53,18 +53,7 @@ namespace GUI.Client.Controllers
         ///     Represents the current state of the game world.
         ///     This is populated with data received from the server.
         /// </summary>
-        public World? theWorld { get; private set; }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="NetworkController"/> class.
-        /// </summary>
-        /// <param name="connection">The network connection used to communicate with the server.</param>
-        /// <param name="playerName">The name of the player to associate with this controller.</param>
-        public NetworkController(NetworkConnection connection, string playerName)
-        {
-            this.network = connection;
-            this.playerName = playerName;
-        }
+        public World? TheWorld { get; private set; }
 
         /// <summary>
         ///     Continuously receives data from the server while the connection is active.
@@ -111,7 +100,7 @@ namespace GUI.Client.Controllers
                 {
                     if (int.TryParse(message, out int parsedPlayerID))
                     {
-                        playerID = parsedPlayerID;
+                        PlayerID = parsedPlayerID;
                         receivedID = true;
                     }
                 }
@@ -122,15 +111,15 @@ namespace GUI.Client.Controllers
                         worldSize = parsedWorldSize;
                         receivedSize = true;
 
-                        theWorld = new World(worldSize);
-                        Snake userSnake = new Snake();
+                        TheWorld = new World(worldSize);
+                        Snake userSnake = new();
 
                         userSnake.SetPlayerName(playerName);
-                        userSnake.SetSnakeID(playerID);
+                        userSnake.SetSnakeID(PlayerID);
 
-                        lock (theWorld)
+                        lock (TheWorld)
                         {
-                            theWorld.Snakes[playerID] = userSnake;
+                            TheWorld.Snakes[PlayerID] = userSnake;
                         }
                     }
                 }
@@ -159,11 +148,11 @@ namespace GUI.Client.Controllers
                 {
                     Wall? wall = JsonSerializer.Deserialize<Wall>(jsonMessage);
 
-                    if (wall != null && theWorld?.Walls != null)
+                    if (wall != null && TheWorld?.Walls != null)
                     {
-                        lock (theWorld)
+                        lock (TheWorld)
                         {
-                            theWorld.Walls[wall.WallID] = wall;
+                            TheWorld.Walls[wall.WallID] = wall;
                         }
                     }
                 }
@@ -172,20 +161,20 @@ namespace GUI.Client.Controllers
                 {
                     Powerup? powerup = JsonSerializer.Deserialize<Powerup>(jsonMessage);
 
-                    if (powerup != null && theWorld?.Powerups != null)
+                    if (powerup != null && TheWorld?.Powerups != null)
                     {
                         if (powerup.PowerupDied)
                         {
-                            lock (theWorld)
+                            lock (TheWorld)
                             {
-                                theWorld.Powerups.Remove(powerup.PowerupID);
+                                TheWorld.Powerups.Remove(powerup.PowerupID);
                             }
                         }
                         else
                         {
-                            lock (theWorld)
+                            lock (TheWorld)
                             {
-                                theWorld.Powerups[powerup.PowerupID] = powerup;
+                                TheWorld.Powerups[powerup.PowerupID] = powerup;
                             }
                         }
                     }
@@ -195,20 +184,20 @@ namespace GUI.Client.Controllers
                 {
                     Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
-                    if (snake != null && theWorld?.Snakes != null)
+                    if (snake != null && TheWorld?.Snakes != null)
                     {
                         if (snake.PlayerDisconnected)
                         {
-                            lock (theWorld)
+                            lock (TheWorld)
                             {
-                                theWorld.Snakes.Remove(snake.SnakeID);
+                                TheWorld.Snakes.Remove(snake.SnakeID);
                             }
                         }
                         else
                         {
-                            lock (theWorld)
+                            lock (TheWorld)
                             {
-                                theWorld.Snakes[snake.SnakeID] = snake;
+                                TheWorld.Snakes[snake.SnakeID] = snake;
                             }
                         }
                     }
@@ -235,17 +224,18 @@ namespace GUI.Client.Controllers
                 return;
             }
 
-            string direction = key switch
+            string? direction = key switch
             {
                 "w" => "up",
                 "a" => "left",
                 "s" => "down",
-                "d" => "right"
+                "d" => "right",
+                _ => null
             };
 
             if (direction != null)
             {
-                ControlCommand command = new ControlCommand(direction);
+                ControlCommand command = new(direction);
                 SendCommand(command);
                 commandSentThisFrame = true;
             }

@@ -72,7 +72,7 @@
     /// <summary>
     ///     The name of the player, used to identify the player on the server.
     /// </summary>
-    private string? playerName;
+    private string playerName = string.Empty;
 
     /// <summary>
     ///     Represents the network connection to the server.
@@ -82,7 +82,7 @@
     /// <summary>
     ///     Controller that manages network communication and game-related commands.
     /// </summary>
-    private NetworkController networkController;
+    private NetworkController? networkController;
 
     /// <summary>
     ///     Connects to the server and initializes the network loop.
@@ -128,7 +128,14 @@
         {
             try
             {
-                await networkController.ReceiveFromServerAsync();
+                if (networkController != null)
+                {
+                    await networkController.ReceiveFromServerAsync();
+                }
+                else
+                {
+                    break;
+                }
             }
             catch (Exception)
             {
@@ -149,7 +156,7 @@
             return;
         }
 
-        networkController.KeyPressCommand(key);
+        networkController?.KeyPressCommand(key);
     }
 
 }
@@ -195,12 +202,12 @@
     /// <summary>
     ///     Snapshot of the current state of the game world.
     /// </summary>
-    private World snapshot;
+    private World? snapshot;
 
     /// <summary>
     ///     Position of the player's view or camera in the game world.
     /// </summary>
-    private Point2D viewHead;
+    private Point2D? viewHead;
 
     /// <summary>
     ///     Called after the component has been rendered. Handles initialization during the first render
@@ -231,7 +238,7 @@
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async void GameLoopAsync()
     {
-        while (networkController.theWorld == null)
+        while (networkController?.TheWorld == null)
         {
             await Task.Delay(20);
         }
@@ -240,9 +247,9 @@
         {
             networkController.ResetCommandFlag();
 
-            lock (networkController.theWorld)
+            lock (networkController.TheWorld)
             {
-                snapshot = new(networkController.theWorld);
+                snapshot = new(networkController.TheWorld);
             }
 
             await DrawFrameAsync(snapshot);
@@ -267,7 +274,9 @@
         await context.ClipAsync();
         await context.SaveAsync();
 
-        if (!snapshot.Snakes.TryGetValue(networkController.playerID, out Snake? snake) || snake.SnakeBody.Count < 2)
+        // Ensure the networkController is initialized, the player's snake exists,
+        // and the snake has enough body segments to be rendered.
+        if (networkController == null || !snapshot.Snakes.TryGetValue(networkController.PlayerID, out Snake? snake) || snake == null || snake.SnakeBody.Count < 2)
         {
             return;
         }
@@ -296,6 +305,11 @@
     {
         foreach (Wall wall in snapshot.Walls.Values)
         {
+            if (wall == null || wall.P1 == null || wall.P2 == null)
+            {
+                continue;
+            }
+
             int deltaX = wall.P2.X - wall.P1.X;
             int deltaY = wall.P2.Y - wall.P1.Y;
             int wallLength = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -389,6 +403,11 @@
     {
         foreach (Powerup powerup in snapshot.Powerups.Values)
         {
+            if (powerup == null || powerup.PowerupLocation == null)
+            {
+                continue;
+            }
+
             await context.DrawImageAsync(powerupImage, powerup.PowerupLocation.X - 11, powerup.PowerupLocation.Y - 11, 22, 22);
         }
     }
