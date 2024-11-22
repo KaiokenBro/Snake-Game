@@ -34,7 +34,12 @@
         }
         else
         {
-            <button class="btn btn-primary" @onclick="ConnectToServer">Connect</button>
+            <button class="btn btn-primary" disabled="@isConnecting" @onclick="ConnectToServerAsync">Connect</button>
+        }
+
+        @if (!string.IsNullOrEmpty(connectionError))
+        {
+            <div class="error">@connectionError</div>
         }
 
     </div>
@@ -85,11 +90,23 @@
     private NetworkController? networkController;
 
     /// <summary>
+    ///     Indicates whether a connection attempt is currently in progress.
+    /// </summary>
+    private bool isConnecting = false;
+
+    /// <summary>
+    ///     Stores the error message to display when a connection attempt fails.
+    /// </summary>
+    private string connectionError = string.Empty;
+
+    /// <summary>
     ///     Connects to the server and initializes the network loop.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task ConnectToServer()
+    private async Task ConnectToServerAsync()
     {
+        isConnecting = true;
+
         if (!connection.IsConnected)
         {
             try
@@ -102,9 +119,25 @@
             }
             catch (Exception)
             {
-                throw;
+                await ShowConnectionErrorAsync("Connection failed. Please check the server and try again.");
+            }
+            finally
+            {
+                isConnecting = false;
             }
         }
+    }
+
+    /// <summary>
+    ///     Displays a connection error message to the user for a specified duration.
+    /// </summary>
+    /// <param name="message">The error message to display.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    private async Task ShowConnectionErrorAsync(string message)
+    {
+        connectionError = message;
+        await Task.Delay(3000);
+        connectionError = string.Empty;
     }
 
     /// <summary>
