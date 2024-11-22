@@ -66,7 +66,7 @@ namespace GUI.Client.Controllers
             {
                 try
                 {
-                    string message = await Task.Run(() => network.ReadLine());
+                    string message = await Task.Run(network.ReadLine);
 
                     if (message == null)
                     {

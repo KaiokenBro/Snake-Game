@@ -349,7 +349,7 @@
 
         foreach (Snake snake in snapshot.Snakes.Values)
         {
-            string strokeColor = snake.SnakeDied ? "rgb(255, 0, 0)" : uniqueColors[snake.SnakeID % uniqueColors.Length];
+            string strokeColor = !snake.SnakeAlive ? "rgb(255, 0, 0)" : uniqueColors[snake.SnakeID % uniqueColors.Length];
 
             await context.SetStrokeStyleAsync(strokeColor);
             await context.SetLineWidthAsync(10);
@@ -367,7 +367,7 @@
 
             var head = snake.SnakeBody[snake.SnakeBody.Count - 1];
 
-            await context.SetFillStyleAsync(snake.SnakeDied ? "rgb(255, 0, 0)" : strokeColor);
+            await context.SetFillStyleAsync(!snake.SnakeAlive ? "rgb(255, 0, 0)" : strokeColor);
             await context.BeginPathAsync();
             await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
             await context.FillAsync();

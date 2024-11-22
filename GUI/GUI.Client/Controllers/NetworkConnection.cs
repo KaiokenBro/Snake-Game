@@ -21,7 +21,7 @@ namespace GUI.Client.Controllers
         /// <summary>
         ///     The connection/socket abstraction
         /// </summary>
-        private TcpClient _tcpClient = new();
+        private readonly TcpClient _tcpClient = new();
 
         /// <summary>
         ///     Reading end of the connection
@@ -125,11 +125,11 @@ namespace GUI.Client.Controllers
         /// </summary>
         /// 
         /// <returns> The contents of the message. </returns>
-        public string ReadLine()
+        public string? ReadLine()
         {
             try
             {
-                string message = _reader?.ReadLine();
+                string? message = _reader?.ReadLine();
 
                 if (!IsConnected || message == null)
                 {
