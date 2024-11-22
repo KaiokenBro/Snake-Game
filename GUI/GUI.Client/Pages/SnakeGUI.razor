@@ -382,6 +382,36 @@
             string displayText = $"{snake.PlayerName} : {snake.PlayerScore}";
 
             await DrawTextAsync(displayText, head.X, head.Y - 15);
+
+            // Draw eyes
+            double eyeOffsetX = 5;
+            double eyeOffsetY = -5;
+            double eyeRadius = 3;
+            double pupilRadius = 1; 
+
+            // Draw the left outer white part
+            await context.SetFillStyleAsync("rgb(255, 255, 255)"); // White
+            await context.BeginPathAsync();
+            await context.ArcAsync(head.X - eyeOffsetX, head.Y + eyeOffsetY, eyeRadius, 0, 2 * Math.PI);
+            await context.FillAsync();
+
+            // Draw the left black pupil
+            await context.SetFillStyleAsync("rgb(0, 0, 0)"); // Black
+            await context.BeginPathAsync();
+            await context.ArcAsync(head.X - eyeOffsetX, head.Y + eyeOffsetY, pupilRadius, 0, 2 * Math.PI);
+            await context.FillAsync();
+
+            // Draw the right outer white part
+            await context.SetFillStyleAsync("rgb(255, 255, 255)");
+            await context.BeginPathAsync();
+            await context.ArcAsync(head.X + eyeOffsetX, head.Y + eyeOffsetY, eyeRadius, 0, 2 * Math.PI);
+            await context.FillAsync();
+
+            // Draw the right black pupil
+            await context.SetFillStyleAsync("rgb(0, 0, 0)");
+            await context.BeginPathAsync();
+            await context.ArcAsync(head.X + eyeOffsetX, head.Y + eyeOffsetY, pupilRadius, 0, 2 * Math.PI);
+            await context.FillAsync();
         }
 
     }
