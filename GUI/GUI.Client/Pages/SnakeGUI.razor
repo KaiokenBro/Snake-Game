@@ -373,6 +373,7 @@
             }
 
             var head = snake.SnakeBody[snake.SnakeBody.Count - 1];
+            var tail = snake.SnakeBody[0];
 
             if (!snake.SnakeAlive)
             {
@@ -384,45 +385,18 @@
             await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
             await context.FillAsync();
 
-            string displayText = $"{snake.PlayerName} : {snake.PlayerScore}";
+            await DrawSnakeTailAsync(tail, snake.SnakeBody[1], strokeColor);
 
+            string displayText = $"{snake.PlayerName} : {snake.PlayerScore}";
             await DrawTextAsync(displayText, head.X, head.Y - 15);
 
-            // Draw eyes
-            double eyeOffsetX = 5;
-            double eyeOffsetY = -5;
-            double eyeRadius = 3;
-            double pupilRadius = 1; 
-
-            // Draw the left outer white part
-            await context.SetFillStyleAsync("rgb(255, 255, 255)"); // White
-            await context.BeginPathAsync();
-            await context.ArcAsync(head.X - eyeOffsetX, head.Y + eyeOffsetY, eyeRadius, 0, 2 * Math.PI);
-            await context.FillAsync();
-
-            // Draw the left black pupil
-            await context.SetFillStyleAsync("rgb(0, 0, 0)"); // Black
-            await context.BeginPathAsync();
-            await context.ArcAsync(head.X - eyeOffsetX, head.Y + eyeOffsetY, pupilRadius, 0, 2 * Math.PI);
-            await context.FillAsync();
-
-            // Draw the right outer white part
-            await context.SetFillStyleAsync("rgb(255, 255, 255)");
-            await context.BeginPathAsync();
-            await context.ArcAsync(head.X + eyeOffsetX, head.Y + eyeOffsetY, eyeRadius, 0, 2 * Math.PI);
-            await context.FillAsync();
-
-            // Draw the right black pupil
-            await context.SetFillStyleAsync("rgb(0, 0, 0)");
-            await context.BeginPathAsync();
-            await context.ArcAsync(head.X + eyeOffsetX, head.Y + eyeOffsetY, pupilRadius, 0, 2 * Math.PI);
-            await context.FillAsync();
+            await DrawSnakeEyesAsync(head.X, head.Y);
         }
 
     }
 
     /// <summary>
-    ///     Draws text on the canvas at a specified position.
+    ///     Draws text on the snake at a specified position.
     /// </summary>
     /// <param name="text">The text to render.</param>
     /// <param name="x">The X-coordinate of the text's position.</param>
@@ -434,6 +408,81 @@
         await context.SetFillStyleAsync("black");
         await context.SetTextAlignAsync(TextAlign.Center);
         await context.FillTextAsync(text, x, y);
+    }
+
+    /// <summary>
+    ///     Draws the eyes of the snake's head at the specified coordinates.
+    /// </summary>
+    /// <param name="headX">The X-coordinate of the snake's head.</param>
+    /// <param name="headY">The Y-coordinate of the snake's head.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    private async Task DrawSnakeEyesAsync(double headX, double headY)
+    {
+        // Draw eyes
+        double eyeOffsetX = 5;
+        double eyeOffsetY = -5;
+        double eyeRadius = 3;
+        double pupilRadius = 1;
+
+        // Draw the left outer white part
+        await context.SetFillStyleAsync("rgb(255, 255, 255)"); // White
+        await context.BeginPathAsync();
+        await context.ArcAsync(headX - eyeOffsetX, headY + eyeOffsetY, eyeRadius, 0, 2 * Math.PI);
+        await context.FillAsync();
+
+        // Draw the left black pupil
+        await context.SetFillStyleAsync("rgb(0, 0, 0)"); // Black
+        await context.BeginPathAsync();
+        await context.ArcAsync(headX - eyeOffsetX, headY + eyeOffsetY, pupilRadius, 0, 2 * Math.PI);
+        await context.FillAsync();
+
+        // Draw the right outer white part
+        await context.SetFillStyleAsync("rgb(255, 255, 255)");
+        await context.BeginPathAsync();
+        await context.ArcAsync(headX + eyeOffsetX, headY + eyeOffsetY, eyeRadius, 0, 2 * Math.PI);
+        await context.FillAsync();
+
+        // Draw the right black pupil
+        await context.SetFillStyleAsync("rgb(0, 0, 0)");
+        await context.BeginPathAsync();
+        await context.ArcAsync(headX + eyeOffsetX, headY + eyeOffsetY, pupilRadius, 0, 2 * Math.PI);
+        await context.FillAsync();
+    }
+
+    /// <summary>
+    ///     Draws a triangular tail for the snake.
+    /// </summary>
+    /// <param name="tailSegment">The tail segment of the snake (first body segment).</param>
+    /// <param name="nextSegment">The next segment in the snake's body, used to determine direction.</param>
+    /// <param name="color">The primary color of the snake.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    private async Task DrawSnakeTailAsync(Point2D tailSegment, Point2D nextSegment, string color)
+    {
+        // Calculate the direction vector from the tail to the next segment
+        double directionX = tailSegment.X - nextSegment.X;
+        double directionY = tailSegment.Y - nextSegment.Y;
+
+        // Normalize the direction vector to unit length
+        double length = Math.Sqrt(directionX * directionX + directionY * directionY);
+        directionX /= length;
+        directionY /= length;
+
+        // Define the triangle points
+        double baseX = tailSegment.X + directionX * 10; // Adjust the base of the triangle
+        double baseY = tailSegment.Y + directionY * 10;
+        double leftX = tailSegment.X + directionY * 5;  // Perpendicular offset for the left point
+        double leftY = tailSegment.Y - directionX * 5;
+        double rightX = tailSegment.X - directionY * 5; // Perpendicular offset for the right point
+        double rightY = tailSegment.Y + directionX * 5;
+
+        // Draw the triangle
+        await context.SetFillStyleAsync(color);
+        await context.BeginPathAsync();
+        await context.MoveToAsync(baseX, baseY);   // Base point
+        await context.LineToAsync(leftX, leftY);   // Left point
+        await context.LineToAsync(rightX, rightY); // Right point
+        await context.ClosePathAsync();
+        await context.FillAsync();
     }
 
     /// <summary>
@@ -451,6 +500,8 @@
             }
 
             await context.DrawImageAsync(powerupImage, powerup.PowerupLocation.X - 11, powerup.PowerupLocation.Y - 11, 22, 22);
+
+
         }
     }
 
