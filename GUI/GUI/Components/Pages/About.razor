@@ -2,6 +2,36 @@
 
 <PageTitle>About</PageTitle>
 
-<h1>Welcome to the snake game!</h1>
+<h1>About This Project</h1>
 
-<p>Say some shit here</p>
+<p>Welcome to the About Page for our Blazor-based project! This page outlines the key design decisions, notable features, and functionality implemented in the application. Please use this as a guide to understand the project's design and the elements we wish to highlight for evaluation.</p>
+
+<h2>Design Decisions</h2>
+<ul>
+    <li><strong>Game Loop Initialization:</strong> The game loop starts immediately after the player successfully connects to the server. This ensures a seamless experience and avoids unnecessary delays before gameplay begins.</li>
+    <li><strong>Error Handling:</strong> Connection errors are managed through a robust error-handling mechanism. For instance, if the server connection fails, the user is shown a clear error message, and they can retry without restarting the application.</li>
+    <li><strong>Differences from the Provided Client:</strong> The client has been significantly improved to offer a better user experience, including enhanced visuals, smoother animations, dynamic snake colors, and the players name and score displayed above their snake.</li>
+</ul>
+
+<h2>Additional Features</h2>
+<ul>
+    <li><strong>Dynamic Visual Effects:</strong> Added animations such as exploading effects when a snake dies, as well as the snake turning red upon death, enhancing the game's interactivity.</li>
+    <li><strong>Head and Eyes Design:</strong> Each snake's head is designed with circular eyes and pupils. This small detail adds a touch of personality to each snake, enhancing the overall experience.</li>
+    <li><strong>Tail Design:</strong> The snakes' tails are represented by dynamic triangles that align with the snake's movement, providing a sleek visual improvement.</li>
+    <li><strong>Power-Up Design:</strong> Each power-up is displayed using a custom image that was carefully edited using photo editing software. The image was meticulously cut to remove any background and bounding box, ensuring that the power-up blends seamlessly with the game's environment. This gives the power-ups a polished, professional appearance in the game.</li>
+</ul>
+
+<h2>What Works</h2>
+<ul>
+    <li>Power-ups, snakes, and walls are displayed correctly.</li>
+    <li>Players can successfully connect to the server and start a game without issues.</li>
+    <li>Snake animations, including movement and visual effects like explosions, are smooth and error-free.</li>
+    <li>Each player's snake is assigned a unique color, making it easy to distinguish between players during gameplay and enhancing the visual clarity of the game.</li>
+</ul>
+
+<h2>What Doesn't Work</h2>
+<ul>
+    <li>If the player clicks the disconnect button during gameplay, re-establishing a connection requires restarting the client.</li>
+</ul>
+
+<p>We hope you enjoy exploring the project and appreciate the effort put into its development. Thank you for evaluating our work!</p>
