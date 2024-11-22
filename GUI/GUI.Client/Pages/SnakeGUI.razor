@@ -374,6 +374,11 @@
 
             var head = snake.SnakeBody[snake.SnakeBody.Count - 1];
 
+            if (!snake.SnakeAlive)
+            {
+                await DrawExplosionAsync(head.X, head.Y);
+            }
+
             await context.SetFillStyleAsync(!snake.SnakeAlive ? "rgb(255, 0, 0)" : strokeColor);
             await context.BeginPathAsync();
             await context.ArcAsync(head.X, head.Y, 10, 0, 2 * Math.PI);
@@ -446,6 +451,37 @@
             }
 
             await context.DrawImageAsync(powerupImage, powerup.PowerupLocation.X - 11, powerup.PowerupLocation.Y - 11, 22, 22);
+        }
+    }
+
+    /// <summary>
+    ///     Draws an explsion of particles on the snakes head when killed.
+    /// </summary>
+    /// <param name="x"> X-coordinate of the snakes head.</param>
+    /// <param name="y"> Y-coordinate of the snakes head.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    private async Task DrawExplosionAsync(double x, double y)
+    {
+        // Can change
+        int numParticles = 10;
+        Random random = new Random();
+
+        for (int i = 0; i < numParticles; i++)
+        {
+            // Produce a random agangle for the particles
+            double angle = random.NextDouble() * 2 * Math.PI;
+            double distance = random.Next(10, 80);
+            double offsetX = Math.Cos(angle) * distance;
+            double offsetY = Math.Sin(angle) * distance;
+            double particleSize = random.Next(3, 10);
+
+            string particleColor = $"rgb({random.Next(200, 255)}, {random.Next(0, 150)}, {random.Next(0, 150)})";
+
+            // Draw the explosive particles
+            await context.SetFillStyleAsync(particleColor);
+            await context.BeginPathAsync();
+            await context.ArcAsync(x + offsetX, y + offsetY, particleSize, 0, 2 * Math.PI);
+            await context.FillAsync();
         }
     }
 
