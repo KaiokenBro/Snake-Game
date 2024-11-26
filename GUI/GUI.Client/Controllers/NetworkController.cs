@@ -55,6 +55,12 @@ namespace GUI.Client.Controllers
         /// </summary>
         public World? TheWorld { get; private set; }
 
+        private const string connectionString = 
+            "server=atr.eng.utah.edu;" +
+            "database=u0674744;" +
+            "uid=u0674744;" +
+            "password=CS3500";
+
         /// <summary>
         ///     Continuously listens for messages from the server and processes them.
         /// </summary>
