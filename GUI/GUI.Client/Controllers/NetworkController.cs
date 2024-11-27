@@ -161,23 +161,23 @@ namespace GUI.Client.Controllers
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // SQL query to update the max_score
-                    string query = "UPDATE Players SET max_score = @newScore WHERE id = @snakeId AND game_id = @gameId;";
-
                     // Open the database connection
                     databaseConnection.Open();
 
-                    // Create a command to execute the UPDATE query
-                    using (MySqlCommand command = new MySqlCommand(query, databaseConnection))
-                    {
-                        // Bind the parameters
-                        command.Parameters.AddWithValue("@snakeId", snakeId);    // The player's ID (Snake ID)
-                        command.Parameters.AddWithValue("@newScore", newScore); // The player's new score
-                        command.Parameters.AddWithValue("@gameId", currentGameId); // The current game ID
+                    // Create a command
+                    MySqlCommand command = databaseConnection.CreateCommand();
 
-                        // Execute the UPDATE command
-                        command.ExecuteNonQuery();
-                    }
+                    // SQL Command
+                    command.CommandText = "UPDATE Players SET max_score = @newScore WHERE id = @snakeId AND game_id = @gameId;";
+
+                    // Add the parameters to the SQL query
+                    command.Parameters.AddWithValue("@newScore", newScore);
+                    command.Parameters.AddWithValue("@snakeId", snakeId);
+                    command.Parameters.AddWithValue("@gameId", currentGameId);
+
+                    // Run/execute the command
+                    // No need for the while loop because we arent doing a query
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -434,10 +434,10 @@ namespace GUI.Client.Controllers
                         // If the snake is new or already exists
                         else
                         {
-                            lock (TheWorld)
+                            // If the snake is new
+                            if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
                             {
-                                // If the snake is new
-                                if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
+                                lock (TheWorld)
                                 {
                                     // Add the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
@@ -445,17 +445,14 @@ namespace GUI.Client.Controllers
                                     // Add snake (others) into database
                                     AddNewSnakeToDatabase(snake);
                                 }
-                                // If the snake already exists
-                                else
+                            }
+                            // If the snake already exists
+                            else
+                            {
+                                lock (TheWorld)
                                 {
-                                    // Update the existing snake in the dictionary
+                                    // Update the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
-
-                                    // Update snakes maxscore to current score
-                                    //TheWorld.Snakes[snake.SnakeID].PlayerMaxScore = snake.PlayerScore;
-
-                                    // Update players maxscore in Database
-                                    //UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }
