@@ -153,13 +153,35 @@ namespace GUI.Client.Controllers
 
         }
 
-        // Update player leavetime in database
-        public void UpdatePlayerLeaveTimeInDatabase()
+        // Update player leavetime in database called in PareJsonData method
+        public void UpdatePlayerLeaveTimeInDatabase(int snakeId)
         {
+            try
+            {
+                // Create a connection to the database
+                using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                {
+                    // SQL query to update leave_time for the current player
+                    string updateQuery = "UPDATE Players SET leave_time = NOW() WHERE id = @snakeId;";
 
+                    // Open the database connection
+                    databaseConnection.Open();
+
+                    // Create a command to execute the UPDATE query
+                    using (MySqlCommand command = new MySqlCommand(updateQuery, databaseConnection))
+                    {
+                        // Execute the update command 
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating leave time for player: {ex.Message}");
+            }
         }
 
-        // Update game endtime in database
+        // Update game endtime in database called in DisconnectFromServer
         public void UpdateGameEndTimeInDatabase()
         {
             try
@@ -168,7 +190,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // SQL query to update end-time for the current game
-                    string updateQuery = "UPDATE Games SET end_time = NOW() WHERE id = @gameId;";
+                    string updateQuery = "UPDATE Games SET end_time = NOW() WHERE id = @currentGameId;";
 
                     // Open the database connection
                     databaseConnection.Open();
@@ -351,11 +373,11 @@ namespace GUI.Client.Controllers
                         {
                             lock (TheWorld)
                             {
+                                // Update leave time for that player in the database
+                                UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
+
                                 // Remove the snake from the dictionary
                                 TheWorld.Snakes.Remove(snake.SnakeID);
-
-                                // Update leave time for that player in the database
-                                UpdatePlayerLeaveTimeInDatabase();
                             }
                         }
 
