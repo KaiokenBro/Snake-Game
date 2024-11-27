@@ -329,6 +329,7 @@ namespace GUI.Client.Controllers
 
                         userSnake.SetPlayerName(playerName);
                         userSnake.SetSnakeID(PlayerID);
+                        AddNewSnakeToDatabase(userSnake, currentGameId);
 
                         lock (TheWorld)
                         {
