@@ -85,7 +85,7 @@ namespace GUI.Client.Controllers
                     // Create a command to execute the INSERT query
                     using (MySqlCommand insertCommand = new MySqlCommand(insertQuery, databaseConnection))
                     {
-                        // Execute the INSERT command asynchronously
+                        // Execute the INSERT command
                         // This will add a new game row to the Games table
                         insertCommand.ExecuteNonQuery();
                     }
@@ -125,7 +125,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // Open the database connection
-                    databaseConnection.OpenAsync();
+                    databaseConnection.Open();
 
                     // Create a command to execute the INSERT query
                     using (MySqlCommand command = new MySqlCommand(query, databaseConnection))
