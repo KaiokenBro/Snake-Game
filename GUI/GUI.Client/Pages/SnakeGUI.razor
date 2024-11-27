@@ -151,8 +151,11 @@
     {
         if (connection.IsConnected)
         {
+            // Update leave time for that player (me) in the database
+            networkController.UpdatePlayerLeaveTimeInDatabase(snapshot.Snakes[currentsnake].SnakeID);
+
             // Update ending time for this game in database
-            //networkController.UpdateGameEndTimeInDatabase();
+            networkController.UpdateGameEndTimeInDatabase();
 
             connection.Disconnect();
         }

@@ -116,7 +116,7 @@ namespace GUI.Client.Controllers
 
         // Called in ParseJsonData in NetworkController
         // Inserts a new row into the Players table
-        public void AddNewSnakeToDatabase(Snake snake, int gameId)
+        public void AddNewSnakeToDatabase(Snake snake)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace GUI.Client.Controllers
                     command.Parameters.AddWithValue("@name", snake.PlayerName);
                     command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
                     command.Parameters.AddWithValue("@enterTime", formattedEnterTime);
-                    command.Parameters.AddWithValue("@gameId", gameId);
+                    command.Parameters.AddWithValue("@gameId", currentGameId);
 
                     // Run/execute the command
                     // No need for the while loop because we arent doing a query
@@ -191,21 +191,28 @@ namespace GUI.Client.Controllers
         {
             try
             {
+                // Format the current DateTime to match MySQL's expected format
+                string formattedLeaveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // SQL query to update leave_time for the current player
-                    string updateQuery = "UPDATE Players SET leave_time = NOW() WHERE id = @snakeId;";
-
                     // Open the database connection
                     databaseConnection.Open();
 
-                    // Create a command to execute the UPDATE query
-                    using (MySqlCommand command = new MySqlCommand(updateQuery, databaseConnection))
-                    {
-                        // Execute the update command 
-                        command.ExecuteNonQuery();
-                    }
+                    // Create a command
+                    MySqlCommand command = databaseConnection.CreateCommand();
+
+                    // SQL query to update leave_time for the current player
+                    command.CommandText = "UPDATE Players SET leave_time = @leaveTime WHERE id = @snakeId;";
+
+                    // Add the parameters to the SQL query
+                    command.Parameters.AddWithValue("@leaveTime", formattedLeaveTime);
+                    command.Parameters.AddWithValue("@snakeId", snakeId);
+
+                    // Run/execute the command
+                    // No need for the while loop because we arent doing a query
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -219,21 +226,28 @@ namespace GUI.Client.Controllers
         {
             try
             {
+                // Format the current DateTime to match MySQL's expected format
+                string formattedEndTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // SQL query to update end-time for the current game
-                    string updateQuery = "UPDATE Games SET end_time = NOW() WHERE id = @currentGameId;";
-
-                    // Open the database connection
+                    // Open the connection
                     databaseConnection.Open();
 
-                    // Create a command to execute the UPDATE query
-                    using (MySqlCommand command = new MySqlCommand(updateQuery, databaseConnection))
-                    {
-                        // Execute the update command 
-                        command.ExecuteNonQuery();
-                    }
+                    // Create a command
+                    MySqlCommand command = databaseConnection.CreateCommand();
+
+                    // SQL Command
+                    command.CommandText = "UPDATE Games SET end_time = @endTime WHERE id = @currentGameId;";
+
+                    // Add the parameters to the SQL query
+                    command.Parameters.AddWithValue("@endTime", formattedEndTime);
+                    command.Parameters.AddWithValue("@currentGameId", currentGameId);
+
+                    // Run/execute the command
+                    // No need for the while loop because we arent doing a query
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -330,8 +344,8 @@ namespace GUI.Client.Controllers
                         userSnake.SetPlayerName(playerName);
                         userSnake.SetSnakeID(PlayerID);
 
-                        // Add snake into database.
-                        AddNewSnakeToDatabase(userSnake, currentGameId);
+                        // Add snake (user) into database
+                        AddNewSnakeToDatabase(userSnake);
 
                         lock (TheWorld)
                         {
@@ -409,8 +423,8 @@ namespace GUI.Client.Controllers
                         {
                             lock (TheWorld)
                             {
-                                // Update leave time for that player in the database
-                                //UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
+                                // Update leave time for that player (others) in the database
+                                UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
 
                                 // Remove the snake from the dictionary
                                 TheWorld.Snakes.Remove(snake.SnakeID);
@@ -428,8 +442,8 @@ namespace GUI.Client.Controllers
                                     // Add the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
 
-                                    // Add the new snake to the database
-                                    AddNewSnakeToDatabase(snake, currentGameId);
+                                    // Add snake (others) into database
+                                    AddNewSnakeToDatabase(snake);
                                 }
                                 // If the snake already exists
                                 else
