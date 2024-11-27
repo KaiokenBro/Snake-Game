@@ -25,7 +25,7 @@ namespace GUI.Client.Models
         public int PlayerScore { get; private set; }
 
         [JsonIgnore]
-        public int PlayerMaxScore { get; private set; } = 0;
+        public int PlayerMaxScore { get; set; } = 0;
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the player joined on this frame.

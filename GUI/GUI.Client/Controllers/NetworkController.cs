@@ -122,7 +122,7 @@ namespace GUI.Client.Controllers
                 {
                     // SQL query to insert a new row into the Players table
                     // This logs the game's start time (NOW()) and leaves end_time as NULL for now
-                    string query = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) " + "VALUES (@id, @name, @maxScore, NOW(), NULL, @gameId);";
+                    string query = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES (@id, @name, @maxScore, NOW(), NULL, @gameId);";
 
                     // Open the database connection
                     databaseConnection.Open();
@@ -148,9 +148,36 @@ namespace GUI.Client.Controllers
         }
 
         // Update players maxscore in database
-        public void UpdatePlayerMaxScoreInDatabase()
+        public void UpdatePlayerMaxScoreInDatabase(int snakeId, int newScore)
         {
+            try
+            {
+                // Create a connection to the database
+                using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                {
+                    // SQL query to update the max_score
+                    string query = "UPDATE Players SET max_score = @newScore WHERE id = @snakeId AND game_id = @gameId;";
 
+                    // Open the database connection
+                    databaseConnection.Open();
+
+                    // Create a command to execute the UPDATE query
+                    using (MySqlCommand command = new MySqlCommand(query, databaseConnection))
+                    {
+                        // Bind the parameters
+                        command.Parameters.AddWithValue("@snakeId", snakeId);    // The player's ID (Snake ID)
+                        command.Parameters.AddWithValue("@newScore", newScore); // The player's new score
+                        command.Parameters.AddWithValue("@gameId", currentGameId); // The current game ID
+
+                        // Execute the UPDATE command
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating max score for player {snakeId}: {ex.Message}");
+            }
         }
 
         // Update player leavetime in database called in PareJsonData method
@@ -401,8 +428,11 @@ namespace GUI.Client.Controllers
                                     // Update the existing snake in the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
 
+                                    // Update snakes maxscore to current score
+                                    TheWorld.Snakes[snake.SnakeID].PlayerMaxScore = snake.PlayerScore;
+
                                     // Update players maxscore in Database
-                                    UpdatePlayerMaxScoreInDatabase();
+                                    UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }
