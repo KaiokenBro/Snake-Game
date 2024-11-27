@@ -72,26 +72,29 @@ namespace GUI.Client.Controllers
         {
             try
             {
+                // Format the current DateTime to match MySQL's expected format
+                string formattedStartTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // SQL query to insert a new row into the Games table
-                    // This logs the game's start time (NOW()) and leaves end_time as NULL for now
-                    string insertQuery = "INSERT INTO Games (start_time, end_time) VALUES (NOW(), NULL);";
-
                     // Open the connection
                     databaseConnection.Open();
 
-                    // Create a command to execute the INSERT query
-                    using (MySqlCommand insertCommand = new MySqlCommand(insertQuery, databaseConnection))
-                    {
-                        // Execute the INSERT command
-                        // This will add a new game row to the Games table
-                        insertCommand.ExecuteNonQuery();
-                    }
+                    // Create a command
+                    MySqlCommand command = databaseConnection.CreateCommand();
+
+                    // SQL Command
+                    command.CommandText = "INSERT INTO Games (start_time, end_time) VALUES (@startTime, NULL);";
+
+                    // Add the parameters to the SQL query
+                    command.Parameters.AddWithValue("@startTime", formattedStartTime);
+
+                    // Run/execute the command
+                    // No need for the while loop because we arent doing a query
+                    command.ExecuteNonQuery();
 
                     // Retrieve the last inserted game ID
-
                     // SQL query to select the last id added to games table
                     string selectQuery = "SELECT LAST_INSERT_ID();";
 
@@ -117,28 +120,31 @@ namespace GUI.Client.Controllers
         {
             try
             {
+                // Format the current DateTime to match MySQL's expected format
+                string formattedEnterTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // SQL query to insert a new row into the Players table
-                    // This logs the game's start time (NOW()) and leaves end_time as NULL for now
-                    string query = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES (@id, @name, @maxScore, NOW(), NULL, @gameId);";
-
                     // Open the database connection
                     databaseConnection.Open();
 
-                    // Create a command to execute the INSERT query
-                    using (MySqlCommand command = new MySqlCommand(query, databaseConnection))
-                    {
-                        // Bind the parameters to the query
-                        command.Parameters.AddWithValue("@id", snake.SnakeID);
-                        command.Parameters.AddWithValue("@name", snake.PlayerName);
-                        command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
-                        command.Parameters.AddWithValue("@gameId", gameId);
+                    // Create a command
+                    MySqlCommand command = databaseConnection.CreateCommand();
 
-                        // Execute the INSERT command
-                        command.ExecuteNonQuery();
-                    }
+                    // SQL Command
+                    command.CommandText = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES (@id, @name, @maxScore, @enterTime, NULL, @gameId);";
+
+                    // Add the parameters to the SQL query
+                    command.Parameters.AddWithValue("@id", snake.SnakeID);
+                    command.Parameters.AddWithValue("@name", snake.PlayerName);
+                    command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
+                    command.Parameters.AddWithValue("@enterTime", formattedEnterTime);
+                    command.Parameters.AddWithValue("@gameId", gameId);
+
+                    // Run/execute the command
+                    // No need for the while loop because we arent doing a query
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -401,7 +407,7 @@ namespace GUI.Client.Controllers
                             lock (TheWorld)
                             {
                                 // Update leave time for that player in the database
-                                UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
+                                //UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
 
                                 // Remove the snake from the dictionary
                                 TheWorld.Snakes.Remove(snake.SnakeID);
@@ -429,10 +435,10 @@ namespace GUI.Client.Controllers
                                     TheWorld.Snakes[snake.SnakeID] = snake;
 
                                     // Update snakes maxscore to current score
-                                    TheWorld.Snakes[snake.SnakeID].PlayerMaxScore = snake.PlayerScore;
+                                    //TheWorld.Snakes[snake.SnakeID].PlayerMaxScore = snake.PlayerScore;
 
                                     // Update players maxscore in Database
-                                    UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
+                                    //UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }
