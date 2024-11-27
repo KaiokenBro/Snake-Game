@@ -75,12 +75,12 @@ namespace GUI.Client.Controllers
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the connection
-                    databaseConnection.Open();
-
                     // SQL query to insert a new row into the Games table
                     // This logs the game's start time (NOW()) and leaves end_time as NULL for now
                     string insertQuery = "INSERT INTO Games (start_time, end_time) VALUES (NOW(), NULL);";
+
+                    // Open the connection
+                    databaseConnection.Open();
 
                     // Create a command to execute the INSERT query
                     using (MySqlCommand insertCommand = new MySqlCommand(insertQuery, databaseConnection))
@@ -103,7 +103,6 @@ namespace GUI.Client.Controllers
 
                         currentGameId = (int)Convert.ToInt64(result); // Explicitly cast to int
                     }
-
                 }
             }
             catch (Exception e)
@@ -118,12 +117,13 @@ namespace GUI.Client.Controllers
         {
             try
             {
-                // SQL query to insert a new row into the Players table
-                // This logs the game's start time (NOW()) and leaves end_time as NULL for now
-                string query = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) " + "VALUES (@id, @name, @maxScore, NOW(), NULL, @gameId);";
-
+                // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
+                    // SQL query to insert a new row into the Players table
+                    // This logs the game's start time (NOW()) and leaves end_time as NULL for now
+                    string query = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) " + "VALUES (@id, @name, @maxScore, NOW(), NULL, @gameId);";
+
                     // Open the database connection
                     databaseConnection.Open();
 
@@ -137,7 +137,7 @@ namespace GUI.Client.Controllers
                         command.Parameters.AddWithValue("@gameId", gameId);
 
                         // Execute the INSERT command
-                        command.ExecuteNonQueryAsync();
+                        command.ExecuteNonQuery();
                     }
                 }
             }
@@ -162,7 +162,29 @@ namespace GUI.Client.Controllers
         // Update game endtime in database
         public void UpdateGameEndTimeInDatabase()
         {
+            try
+            {
+                // Create a connection to the database
+                using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                {
+                    // SQL query to update end-time for the current game
+                    string updateQuery = "UPDATE Games SET end_time = NOW() WHERE id = @gameId;";
 
+                    // Open the database connection
+                    databaseConnection.Open();
+
+                    // Create a command to execute the UPDATE query
+                    using (MySqlCommand command = new MySqlCommand(updateQuery, databaseConnection))
+                    {
+                        // Execute the update command 
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating game end time: {ex.Message}");
+            }
         }
 
         /// <summary>
