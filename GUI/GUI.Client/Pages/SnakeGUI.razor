@@ -152,6 +152,9 @@
         if (connection.IsConnected)
         {
             connection.Disconnect();
+
+            // Update ending time for this game in database
+            networkController.UpdateGameEndTimeInDatabase();
         }
     }
 

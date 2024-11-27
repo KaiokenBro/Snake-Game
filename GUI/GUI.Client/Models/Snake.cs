@@ -24,6 +24,7 @@ namespace GUI.Client.Models
         [JsonPropertyName("score")]
         public int PlayerScore { get; private set; }
 
+        [JsonIgnore]
         public int PlayerMaxScore { get; private set; } = 0;
 
         /// <summary>

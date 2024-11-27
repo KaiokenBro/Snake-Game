@@ -75,7 +75,7 @@ namespace GUI.Client.Controllers
                 // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the connection asynchronously
+                    // Open the connection
                     databaseConnection.Open();
 
                     // SQL query to insert a new row into the Games table
@@ -145,6 +145,24 @@ namespace GUI.Client.Controllers
             {
                 Console.WriteLine($"Error adding snake {snake.SnakeID} to the database: {ex.Message}");
             }
+        }
+
+        // Update players maxscore in database
+        public void UpdatePlayerMaxScoreInDatabase()
+        {
+
+        }
+
+        // Update player leavetime in database
+        public void UpdatePlayerLeaveTimeInDatabase()
+        {
+
+        }
+
+        // Update game endtime in database
+        public void UpdateGameEndTimeInDatabase()
+        {
+
         }
 
         /// <summary>
@@ -313,6 +331,9 @@ namespace GUI.Client.Controllers
                             {
                                 // Remove the snake from the dictionary
                                 TheWorld.Snakes.Remove(snake.SnakeID);
+
+                                // Update leave time for that player in the database
+                                UpdatePlayerLeaveTimeInDatabase();
                             }
                         }
 
@@ -335,6 +356,9 @@ namespace GUI.Client.Controllers
                                 {
                                     // Update the existing snake in the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
+
+                                    // Update players maxscore in Database
+                                    UpdatePlayerMaxScoreInDatabase();
                                 }
                             }
                         }
