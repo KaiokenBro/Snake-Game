@@ -2,6 +2,7 @@
 // Date: 11/20/2024
 
 using GUI.Client.Models;
+using MySql.Data.MySqlClient;
 using System.Data.Common;
 using System.Text.Json;
 
@@ -55,11 +56,96 @@ namespace GUI.Client.Controllers
         /// </summary>
         public World? TheWorld { get; private set; }
 
+        // Connection string
         private const string connectionString = 
             "server=atr.eng.utah.edu;" +
             "database=u0674744;" +
             "uid=u0674744;" +
             "password=CS3500";
+
+        // Holds the current game id
+        private int currentGameId;
+
+        // Called in ConnectToServerAsync in client
+        // Inserts a new row into the games table
+        public void AddNewGameToDatabase()
+        {
+            try
+            {
+                // Create a connection to the database
+                using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                {
+                    // Open the connection asynchronously
+                    databaseConnection.Open();
+
+                    // SQL query to insert a new row into the Games table
+                    // This logs the game's start time (NOW()) and leaves end_time as NULL for now
+                    string insertQuery = "INSERT INTO Games (start_time, end_time) VALUES (NOW(), NULL);";
+
+                    // Create a command to execute the INSERT query
+                    using (MySqlCommand insertCommand = new MySqlCommand(insertQuery, databaseConnection))
+                    {
+                        // Execute the INSERT command asynchronously
+                        // This will add a new game row to the Games table
+                        insertCommand.ExecuteNonQuery();
+                    }
+
+                    // Retrieve the last inserted game ID
+
+                    // SQL query to select the last id added to games table
+                    string selectQuery = "SELECT LAST_INSERT_ID();";
+
+                    // Create a command to execute the SELECT query
+                    using (MySqlCommand selectCommand = new MySqlCommand(selectQuery, databaseConnection))
+                    {
+                        // Store gameId in result
+                        var result = selectCommand.ExecuteScalar();
+
+                        currentGameId = (int)Convert.ToInt64(result); // Explicitly cast to int
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error starting new game: {e.Message}");
+            }
+        }
+
+        // Called in ParseJsonData in NetworkController
+        // Inserts a new row into the Players table
+        public void AddNewSnakeToDatabase(Snake snake, int gameId)
+        {
+            try
+            {
+                // SQL query to insert a new row into the Players table
+                // This logs the game's start time (NOW()) and leaves end_time as NULL for now
+                string query = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) " + "VALUES (@id, @name, @maxScore, NOW(), NULL, @gameId);";
+
+                using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                {
+                    // Open the database connection
+                    databaseConnection.OpenAsync();
+
+                    // Create a command to execute the INSERT query
+                    using (MySqlCommand command = new MySqlCommand(query, databaseConnection))
+                    {
+                        // Bind the parameters to the query
+                        command.Parameters.AddWithValue("@id", snake.SnakeID);
+                        command.Parameters.AddWithValue("@name", snake.PlayerName);
+                        command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
+                        command.Parameters.AddWithValue("@gameId", gameId);
+
+                        // Execute the INSERT command
+                        command.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding snake {snake.SnakeID} to the database: {ex.Message}");
+            }
+        }
 
         /// <summary>
         ///     Continuously listens for messages from the server and processes them.
@@ -216,24 +302,45 @@ namespace GUI.Client.Controllers
                 {
                     Snake? snake = JsonSerializer.Deserialize<Snake>(jsonMessage);
 
+                    // If the snake is valid
                     if (snake != null && TheWorld?.Snakes != null)
                     {
+
+                        // If the snake disconnected
                         if (snake.PlayerDisconnected)
                         {
                             lock (TheWorld)
                             {
+                                // Remove the snake from the dictionary
                                 TheWorld.Snakes.Remove(snake.SnakeID);
                             }
                         }
+
+                        // If the snake is new or already exists
                         else
                         {
                             lock (TheWorld)
                             {
-                                TheWorld.Snakes[snake.SnakeID] = snake;
+                                // If the snake is new
+                                if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
+                                {
+                                    // Add the snake to the dictionary
+                                    TheWorld.Snakes[snake.SnakeID] = snake;
+
+                                    // Add the new snake to the database
+                                    AddNewSnakeToDatabase(snake, currentGameId);
+                                }
+                                // If the snake already exists
+                                else
+                                {
+                                    // Update the existing snake in the dictionary
+                                    TheWorld.Snakes[snake.SnakeID] = snake;
+                                }
                             }
                         }
                     }
                 }
+
             }
             catch (Exception)
             {

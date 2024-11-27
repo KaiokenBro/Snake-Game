@@ -116,6 +116,9 @@
                 connection.Send(playerName);
                 networkController = new NetworkController(connection, playerName);
 
+                // Log the start of a new game
+                networkController.AddNewGameToDatabase();
+
                 await networkController.NetworkLoop(networkController);
             }
             catch (Exception)
