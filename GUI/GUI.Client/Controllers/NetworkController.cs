@@ -421,11 +421,11 @@ namespace GUI.Client.Controllers
                         // If the snake disconnected
                         if (snake.PlayerDisconnected)
                         {
+                            // Update leave time for that player (others) in the database
+                            UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
+
                             lock (TheWorld)
                             {
-                                // Update leave time for that player (others) in the database
-                                UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
-
                                 // Remove the snake from the dictionary
                                 TheWorld.Snakes.Remove(snake.SnakeID);
                             }
@@ -437,13 +437,13 @@ namespace GUI.Client.Controllers
                             // If the snake is new
                             if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
                             {
+                                // Add snake (others) into database
+                                AddNewSnakeToDatabase(snake);
+
                                 lock (TheWorld)
                                 {
                                     // Add the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
-
-                                    // Add snake (others) into database
-                                    AddNewSnakeToDatabase(snake);
                                 }
                             }
                             // If the snake already exists
