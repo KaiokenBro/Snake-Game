@@ -329,6 +329,8 @@ namespace GUI.Client.Controllers
 
                         userSnake.SetPlayerName(playerName);
                         userSnake.SetSnakeID(PlayerID);
+
+                        // Add snake into database.
                         AddNewSnakeToDatabase(userSnake, currentGameId);
 
                         lock (TheWorld)
