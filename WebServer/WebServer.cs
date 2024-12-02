@@ -19,44 +19,44 @@ namespace WebServer
 
         static void Main(string[] args)
         {
-            Server.Connect(HandleHttpConnection, 80);
+            //Server.Connect(HandleHttpConnection, 80);
 
             // Prevent main from returning
             Console.Read();
         }
 
-        private static void HandleHttpConnection(NetworkConnection connection)
-        {
+        //private static void HandleHttpConnection(NetworkConnection connection)
+        //{
 
             // Browser sends
-            string request = client.ReadLine();
-            Console.WriteLine(request);
+            //string request = client.ReadLine();
+            //Console.WriteLine(request);
 
             // If Homepage
-            if (request.Contains("GET /"))
-            {
+            //if (request.Contains("GET /"))
+            //{
 
-            }
+            //}
 
             // If Game
-            else if (request.Contains("GET /games"))
-            {
+            //else if (request.Contains("GET /games"))
+            //{
 
-            }
+            //}
 
             // If Specific Game
-            else if (request.Contains("GET /games?gid=x"))
-            {
+            //else if (request.Contains("GET /games?gid=x"))
+            //{
 
-            }
+            //}
 
             // If bad request
-            else
-            {
+            //else
+            //{
 
-            }
+            //}
 
-        }
+        //}
 
     }
 }

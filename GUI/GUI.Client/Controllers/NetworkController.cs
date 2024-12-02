@@ -56,19 +56,28 @@ namespace GUI.Client.Controllers
         /// </summary>
         public World? TheWorld { get; private set; }
 
-        // Connection string
+        /// <summary>
+        ///     Connection string used to establish a connection to the MySQL database.
+        /// </summary>
         private const string connectionString = 
             "server=atr.eng.utah.edu;" +
             "database=u0674744;" +
             "uid=u0674744;" +
             "password=CS3500";
 
-        // Holds the current game id
+        /// <summary>
+        ///     Holds the ID of the current game session.
+        ///     This value is set after a new game is added to the database.
+        /// </summary>
         private int currentGameId;
 
-        // Called in ConnectToServerAsync in client
-        // Inserts a new row into the games table
-        public void AddNewGameToDatabase()
+        /// <summary>
+        ///     Inserts a new row into the "Games" table in the database, recording the start time of the game.
+        ///     Also retrieves the ID of the newly created game for future use.
+        ///     
+        ///     This method is called in the ConnectToServerAsync method if the SnakeGUI.razor class.
+        /// </summary>
+        public async Task AddNewGameToDatabaseAsync()
         {
             try
             {
@@ -79,7 +88,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // Open the connection
-                    databaseConnection.Open();
+                    await databaseConnection.OpenAsync();
 
                     // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
@@ -92,7 +101,7 @@ namespace GUI.Client.Controllers
 
                     // Run/execute the command
                     // No need for the while loop because we arent doing a query
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
 
                     // Retrieve the last inserted game ID
                     // SQL query to select the last id added to games table
@@ -114,9 +123,17 @@ namespace GUI.Client.Controllers
             }
         }
 
-        // Called in ParseJsonData in NetworkController
-        // Inserts a new row into the Players table
-        public void AddNewSnakeToDatabase(Snake snake)
+        /// <summary>
+        ///     Adds a new snake entry to the "Players" table in the database.
+        ///     It records the snake's details including ID, name, max score, enter time, and game ID.
+        ///     
+        ///     This method is initially called in the HandleServerData method of the NetworkController class (For the current player).
+        ///     This method is then called in the ParseJsonData method of the NetworkController class (For other players).
+        /// </summary>
+        /// <param name="snake">
+        ///     An instance of the Snake class containing details of the snake to be added to the database.
+        /// </param>
+        public async Task AddNewSnakeToDatabaseAsync(Snake snake)
         {
             try
             {
@@ -127,7 +144,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // Open the database connection
-                    databaseConnection.Open();
+                    await databaseConnection.OpenAsync();
 
                     // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
@@ -144,7 +161,7 @@ namespace GUI.Client.Controllers
 
                     // Run/execute the command
                     // No need for the while loop because we arent doing a query
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
             catch (Exception ex)
@@ -153,8 +170,15 @@ namespace GUI.Client.Controllers
             }
         }
 
-        // Update players maxscore in database
-        public void UpdatePlayerMaxScoreInDatabase(int snakeId, int newScore)
+        /// <summary>
+        ///     Updates the max score for a player in the database if the new score is higher.
+        ///     
+        ///     This method is called in the ParseJsonData method.
+        /// </summary>
+        /// <param name="snakeId">The unique ID of the snake (player) whose max score is being updated.</param>
+        /// <param name="newScore">The new max score to update in the database.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public async Task UpdatePlayerMaxScoreInDatabaseAsync(int snakeId, int newScore)
         {
             try
             {
@@ -162,7 +186,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // Open the database connection
-                    databaseConnection.Open();
+                    await databaseConnection.OpenAsync();
 
                     // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
@@ -177,7 +201,7 @@ namespace GUI.Client.Controllers
 
                     // Run/execute the command
                     // No need for the while loop because we arent doing a query
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
             catch (Exception ex)
@@ -186,8 +210,16 @@ namespace GUI.Client.Controllers
             }
         }
 
-        // Update player leavetime in database called in PareJsonData method
-        public void UpdatePlayerLeaveTimeInDatabase(int snakeId)
+        /// <summary>
+        ///     Updates the leave time for a player in the "Players" table in the database.
+        ///     
+        ///     This method is called in the ParseJsonData method to record when a player leaves the game (Other players).
+        ///     This method is also called in the DisconnectFromServer method in the SnakeGUI.razor class when a player leaves the game (Current Player).
+        /// </summary>
+        /// <param name="snakeId">
+        ///     The ID of the snake (player) whose leave time is being updated.
+        /// </param>
+        public async Task UpdatePlayerLeaveTimeInDatabaseAsync(int snakeId)
         {
             try
             {
@@ -198,7 +230,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // Open the database connection
-                    databaseConnection.Open();
+                    await databaseConnection.OpenAsync();
 
                     // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
@@ -212,7 +244,7 @@ namespace GUI.Client.Controllers
 
                     // Run/execute the command
                     // No need for the while loop because we arent doing a query
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
             catch (Exception ex)
@@ -221,8 +253,12 @@ namespace GUI.Client.Controllers
             }
         }
 
-        // Update game endtime in database called in DisconnectFromServer
-        public void UpdateGameEndTimeInDatabase()
+        /// <summary>
+        ///     Updates the end time for the current game in the "Games" table in the database.
+        ///     
+        ///     This method is called in the DisconnectFromServer method in SnakeGUI.razor class to record when a game ends.
+        /// </summary>
+        public async Task UpdateGameEndTimeInDatabaseAsync()
         {
             try
             {
@@ -233,7 +269,7 @@ namespace GUI.Client.Controllers
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
                     // Open the connection
-                    databaseConnection.Open();
+                    await databaseConnection.OpenAsync();
 
                     // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
@@ -247,7 +283,7 @@ namespace GUI.Client.Controllers
 
                     // Run/execute the command
                     // No need for the while loop because we arent doing a query
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
             catch (Exception ex)
@@ -345,7 +381,7 @@ namespace GUI.Client.Controllers
                         userSnake.SetSnakeID(PlayerID);
 
                         // Add snake (user) into database
-                        AddNewSnakeToDatabase(userSnake);
+                        _ = AddNewSnakeToDatabaseAsync(userSnake);
 
                         lock (TheWorld)
                         {
@@ -422,7 +458,7 @@ namespace GUI.Client.Controllers
                         if (snake.PlayerDisconnected)
                         {
                             // Update leave time for that player (others) in the database
-                            UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
+                            _ = UpdatePlayerLeaveTimeInDatabaseAsync(snake.SnakeID);
 
                             lock (TheWorld)
                             {
@@ -438,7 +474,7 @@ namespace GUI.Client.Controllers
                             if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
                             {
                                 // Add snake (others) into database
-                                AddNewSnakeToDatabase(snake);
+                                _ = AddNewSnakeToDatabaseAsync(snake);
 
                                 lock (TheWorld)
                                 {
@@ -453,6 +489,19 @@ namespace GUI.Client.Controllers
                                 {
                                     // Update the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
+                                }
+
+                                // If current score is greater than max score
+                                if (snake.PlayerScore > snake.PlayerMaxScore)
+                                {
+                                    lock (TheWorld)
+                                    {
+                                        // Update locally
+                                        snake.PlayerMaxScore = snake.PlayerScore;
+                                    }
+
+                                    // Update database
+                                    _ = UpdatePlayerMaxScoreInDatabaseAsync(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }

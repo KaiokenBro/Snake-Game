@@ -23,7 +23,7 @@ namespace GUI.Client.Models
         public int Y { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Point2D"/> class with specified X and Y coordinates.
+        ///     Initializes a new instance of the <see cref="Point2D"/> class with specified X and Y coordinates.
         /// </summary>
         /// <param name="x">The X-coordinate of the point.</param>
         /// <param name="y">The Y-coordinate of the point.</param>

@@ -117,7 +117,7 @@
                 networkController = new NetworkController(connection, playerName);
 
                 // Log the start of a new game
-                networkController.AddNewGameToDatabase();
+                await networkController.AddNewGameToDatabaseAsync();
 
                 await networkController.NetworkLoop(networkController);
             }
@@ -152,10 +152,10 @@
         if (connection.IsConnected)
         {
             // Update leave time for that player (me) in the database
-            networkController.UpdatePlayerLeaveTimeInDatabase(networkController.PlayerID);
+            _ = networkController.UpdatePlayerLeaveTimeInDatabaseAsync(networkController.PlayerID);
 
             // Update ending time for this game in database
-            networkController.UpdateGameEndTimeInDatabase();
+            _ = networkController.UpdateGameEndTimeInDatabaseAsync();
 
             connection.Disconnect();
         }
