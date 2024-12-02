@@ -60,8 +60,8 @@ namespace GUI.Client.Controllers
 
             if (IsConnected)
             {
-                _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-                _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+                _reader = new StreamReader(_tcpClient.GetStream(), new UTF8Encoding(false));
+                _writer = new StreamWriter(_tcpClient.GetStream(), new UTF8Encoding(false)) { AutoFlush = true };
             }
         }
 
@@ -87,8 +87,8 @@ namespace GUI.Client.Controllers
             if (!IsConnected)
             {
                 _tcpClient.Connect(host, port);
-                _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-                _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+                _reader = new StreamReader(_tcpClient.GetStream(), new UTF8Encoding(false));
+                _writer = new StreamWriter(_tcpClient.GetStream(), new UTF8Encoding(false)) { AutoFlush = true };
             }
         }
 
