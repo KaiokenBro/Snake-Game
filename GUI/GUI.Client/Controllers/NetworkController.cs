@@ -59,7 +59,7 @@ namespace GUI.Client.Controllers
         /// <summary>
         ///     Connection string used to establish a connection to the MySQL database.
         /// </summary>
-        private const string connectionString = 
+        public const string connectionString = 
             "server=atr.eng.utah.edu;" +
             "database=u0674744;" +
             "uid=u0674744;" +
