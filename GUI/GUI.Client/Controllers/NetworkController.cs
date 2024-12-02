@@ -296,7 +296,7 @@ namespace GUI.Client.Controllers
         ///     Continuously listens for messages from the server and processes them.
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task NetworkLoop(NetworkController networkController)
+        public async Task NetworkLoopAsync(NetworkController networkController)
         {
             while (network.IsConnected)
             {
@@ -494,11 +494,8 @@ namespace GUI.Client.Controllers
                                 // If current score is greater than max score
                                 if (snake.PlayerScore > snake.PlayerMaxScore)
                                 {
-                                    lock (TheWorld)
-                                    {
-                                        // Update locally
-                                        snake.PlayerMaxScore = snake.PlayerScore;
-                                    }
+                                    // Update locally
+                                    snake.PlayerMaxScore = snake.PlayerScore;
 
                                     // Update database
                                     _ = UpdatePlayerMaxScoreInDatabaseAsync(snake.SnakeID, snake.PlayerMaxScore);

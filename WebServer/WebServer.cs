@@ -1,4 +1,5 @@
-﻿using MySqlX.XDevAPI;
+﻿using GUI.Client.Controllers;
+using MySqlX.XDevAPI;
 
 namespace WebServer
 {
@@ -19,26 +20,37 @@ namespace WebServer
 
         static void Main(string[] args)
         {
-            //Server.Connect(HandleHttpConnection, 80);
+            Server.StartServer(HandleHttpConnection, 80);
 
             // Prevent main from returning
             Console.Read();
         }
 
-        //private static void HandleHttpConnection(NetworkConnection connection)
-        //{
+        private static void HandleHttpConnection(NetworkConnection client)
+        {
 
             // Browser sends
-            //string request = client.ReadLine();
-            //Console.WriteLine(request);
+            string request = client.ReadLine();
+
+            Console.WriteLine(request);
 
             // If Homepage
-            //if (request.Contains("GET /"))
-            //{
+            if (request.Contains("GET /"))
+            {
+                // Opening HTML
+                string response = "<html>";
 
-            //}
+                // Header
+                response += "<h3>Welcome to the Snake Game Database!</h3>";
 
-            // If Game
+                // Link
+                response += "<a href=\"/games\">View Games</a>";
+
+                // Closing HTML
+                response += "</html>";
+            }
+
+            // If All Games
             //else if (request.Contains("GET /games"))
             //{
 
@@ -50,13 +62,9 @@ namespace WebServer
 
             //}
 
-            // If bad request
-            //else
-            //{
-
-            //}
-
-        //}
+            // Server closes socket
+            client.Disconnect();
+        }
 
     }
 }
