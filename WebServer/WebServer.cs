@@ -20,7 +20,7 @@ namespace WebServer
 
         static void Main(string[] args)
         {
-            Server.StartServer(HandleHttpConnection, 80);
+            Server.StartServer(HandleHttpConnection, 8080);
 
             // Prevent main from returning
             Console.Read();
@@ -32,10 +32,8 @@ namespace WebServer
             // Browser sends
             string request = client.ReadLine();
 
-            Console.WriteLine(request);
-
             // If Homepage
-            if (request.Contains("GET /"))
+            if (request.Contains("GET / "))
             {
                 // Opening HTML
                 string response = "<html>";
@@ -48,19 +46,57 @@ namespace WebServer
 
                 // Closing HTML
                 response += "</html>";
+
+                client.Send(httpOkHeader + response);
             }
 
             // If All Games
-            //else if (request.Contains("GET /games"))
-            //{
+            else if (request.Contains("GET /games"))
+            {
+                // Opening HTML
+                string response = "<html>";
 
-            //}
+                // Opening Table
+                response += "<table border=\"1\">";
 
-            // If Specific Game
-            //else if (request.Contains("GET /games?gid=x"))
-            //{
+                // Opening Table Head
+                response += "<thead>";
 
-            //}
+                // Opening Table Row
+                response += "<tr>";
+
+                // Table Data
+                response += "<td>ID</td><td>Start</td><td>End</td>";
+
+                // Closing Table Row
+                response += "</tr>";
+
+                // Closing Table Head
+                response += "</thead>";
+
+                // Opening Table Body
+                response += "<tbody>";
+
+                // Opening Table Row
+                response += "<tr>";
+
+                // Table Data
+                // TODO
+
+                // Closing Table Row
+                response += "</tr>";
+
+                // Closing Table Body
+                response += "</tbody>";
+
+                // Closing Table
+                response += "</table>";
+
+                // Closing HTML
+                response += "</html>";
+
+                client.Send(httpOkHeader + response);
+            }
 
             // Server closes socket
             client.Disconnect();
