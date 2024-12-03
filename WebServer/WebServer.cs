@@ -16,8 +16,6 @@ namespace WebServer
     {
         private const string httpOkHeader = "HTTP/1.1 200 OK\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n";
 
-        private const string httpBadHeader = "HTTP/1.1 404 Not Found\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n" + "\r\n";
-
         static void Main(string[] args)
         {
             Server.StartServer(HandleHttpConnection, 8080);

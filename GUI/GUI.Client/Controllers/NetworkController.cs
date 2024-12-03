@@ -412,14 +412,14 @@ namespace GUI.Client.Controllers
                                 {
                                     // Update the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
+
+                                    snake.UpdatePlayerMaxScore(snake.PlayerScore);
                                 }
 
                                 // If current score is greater than max score
                                 if (snake.PlayerScore > snake.PlayerMaxScore)
                                 {
-                                    snake.UpdatePlayerMaxScore(snake.PlayerScore);
-
-                                    // Update database
+                                    //snake.UpdatePlayerMaxScore(snake.PlayerScore);
                                     _ = UpdatePlayerMaxScoreInDatabaseAsync(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
