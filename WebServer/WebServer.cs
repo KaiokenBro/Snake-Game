@@ -1,4 +1,7 @@
-﻿using GUI.Client.Controllers;
+﻿// Name: Harrison Doppelt and Victor Valdez Landa
+// Date: 11/20/2024
+
+using GUI.Client.Controllers;
 using GUI.Client.Models;
 using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI;
@@ -12,16 +15,9 @@ namespace WebServer
 
         // http://localhost:8080/
 
-        public const string httpOkHeader =
-            "HTTP/1.1 200 OK\r\n" +
-            "Connection: close\r\n" +
-            "Content-Type: text/html; charset=UTF-8\r\n";
+        private const string httpOkHeader = "HTTP/1.1 200 OK\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n";
 
-        private const string httpBadHeader =
-            "HTTP/1.1 404 Not Found\r\n" +
-            "Connection: close\r\n" +
-            "Content-Type: text/html; charset=UTF-8\r\n" +
-            "\r\n";
+        private const string httpBadHeader = "HTTP/1.1 404 Not Found\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n" + "\r\n";
 
         static void Main(string[] args)
         {
@@ -33,10 +29,7 @@ namespace WebServer
 
         private static void HandleHttpConnection(NetworkConnection client)
         {
-
-            // Browser sends
             string request = client.ReadLine();
-
             string response = string.Empty;
 
             // If Specifc Game
@@ -44,7 +37,6 @@ namespace WebServer
             {
                 // Parse Game ID from the request URL
                 int gameId = ParseGameId(request);
-
                 response = GetSpecificGamePage(gameId);
             }
 
@@ -64,31 +56,20 @@ namespace WebServer
             int contentLength = Encoding.UTF8.GetByteCount(response);
             string header = httpOkHeader + $"Content-Length: {contentLength}\r\n\r\n";
 
-            // Send response
             client.Send(header + response);
-
-            // Server closes socket
             client.Disconnect();
         }
 
         private static string GetGamePage()
         {
-            // List to store games
             var games = new List<(int GameId, string StartTime, string EndTime)>();
 
-            // Create a connection to the database
             using (MySqlConnection databaseConnection = new MySqlConnection(NetworkController.connectionString))
             {
-                // Open the connection
                 databaseConnection.Open();
-
-                // Create a command
                 MySqlCommand command = databaseConnection.CreateCommand();
-
-                // SQL Command
                 command.CommandText = "SELECT id, start_time, end_time FROM Games;";
 
-                // Run the command
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
                     // Get the results out
@@ -103,33 +84,29 @@ namespace WebServer
                 }
             }
 
-            // holds html
-            string html = string.Empty;
-
-            html += "<html><h3>All Games</h3><table border='1'>";
-            html += "<thead><tr><td>ID</td><td>Start</td><td>End</td></tr></thead><tbody>";
+            string gamesHtml = string.Empty;
+            gamesHtml += "<html><h3>All Games</h3><table border='1'>";
+            gamesHtml += "<thead><tr><td>ID</td><td>Start</td><td>End</td></tr></thead><tbody>";
 
             foreach (var game in games)
             {
-                html += "<tr>";
-                html += $"<td><a href='/games?gid={game.GameId}'>{game.GameId}</a></td>";
-                html += $"<td>{game.StartTime}</td>";
-                html += $"<td>{game.EndTime}</td>";
-                html += "</tr>";
+                gamesHtml += "<tr>";
+                gamesHtml += $"<td><a href='/games?gid={game.GameId}'>{game.GameId}</a></td>";
+                gamesHtml += $"<td>{game.StartTime}</td>";
+                gamesHtml += $"<td>{game.EndTime}</td>";
+                gamesHtml += "</tr>";
             }
 
-            html += "</tbody></table></html>";
+            gamesHtml += "</tbody></table></html>";
 
-            return html;
+            return gamesHtml;
         }
 
         private static int ParseGameId(string request)
         {
-            // Extract the part after "gid="
             int startIndex = request.IndexOf("?gid=") + 5;
             string gameIdString = request.Substring(startIndex).Split(' ')[0];
 
-            // Convert to integer
             if (int.TryParse(gameIdString, out int gameId))
             {
                 return gameId;
@@ -140,32 +117,22 @@ namespace WebServer
 
         private static string GetSpecificGamePage(int gameId)
         {
-            string gameInfoHtml = "";
-            string playersHtml = "";
+            string specificGameHtml = string.Empty;
+            string playersHtml = string.Empty;
 
-            // Create a connection to the database
             using (MySqlConnection databaseConnection = new MySqlConnection(NetworkController.connectionString))
             {
-                // Open the connection
                 databaseConnection.Open();
-
-                // Create a command
                 MySqlCommand command = databaseConnection.CreateCommand();
-
-                // SQL Command
                 command.CommandText = "SELECT id, name, max_score, enter_time, leave_time FROM Players WHERE game_id = @gameId;";
-
-                // Add the parameters to the SQL query
                 command.Parameters.AddWithValue("@gameId", gameId);
 
-                // Run the command
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
                     playersHtml = "<table border='1'><thead><tr>" +
                                   "<td>Player ID</td><td>Player Name</td><td>Max Score</td><td>Enter Time</td><td>Leave Time</td>" +
                                   "</tr></thead><tbody>";
 
-                    // Get the results out
                     while (reader.Read())
                     {
                         int playerId = reader.GetInt32(0);
@@ -178,8 +145,7 @@ namespace WebServer
                     }
                 }
 
-                // Combine game info and player stats
-                return $"<html><h3>Stats for Game {gameId}</h3>{gameInfoHtml}{playersHtml}</html>";
+                return $"<html><h3>Stats for Game {gameId}</h3>{specificGameHtml}{playersHtml}</html>";
             }
         }
     }

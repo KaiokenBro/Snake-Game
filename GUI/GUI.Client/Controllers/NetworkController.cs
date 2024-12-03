@@ -59,11 +59,7 @@ namespace GUI.Client.Controllers
         /// <summary>
         ///     Connection string used to establish a connection to the MySQL database.
         /// </summary>
-        public const string connectionString = 
-            "server=atr.eng.utah.edu;" +
-            "database=u0674744;" +
-            "uid=u0674744;" +
-            "password=CS3500";
+        public const string connectionString = "server=atr.eng.utah.edu;" + "database=u0674744;" + "uid=u0674744;" + "password=CS3500";
 
         /// <summary>
         ///     Holds the ID of the current game session.
@@ -81,39 +77,22 @@ namespace GUI.Client.Controllers
         {
             try
             {
-                // Format the current DateTime to match MySQL's expected format
                 string formattedStartTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the connection
                     await databaseConnection.OpenAsync();
-
-                    // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
-
-                    // SQL Command
                     command.CommandText = "INSERT INTO Games (start_time, end_time) VALUES (@startTime, NULL);";
-
-                    // Add the parameters to the SQL query
                     command.Parameters.AddWithValue("@startTime", formattedStartTime);
-
-                    // Run/execute the command
-                    // No need for the while loop because we arent doing a query
                     await command.ExecuteNonQueryAsync();
-
-                    // Retrieve the last inserted game ID
-                    // SQL query to select the last id added to games table
                     string selectQuery = "SELECT LAST_INSERT_ID();";
 
-                    // Create a command to execute the SELECT query
                     using (MySqlCommand selectCommand = new MySqlCommand(selectQuery, databaseConnection))
                     {
-                        // Store gameId in result
                         var result = selectCommand.ExecuteScalar();
 
-                        currentGameId = (int)Convert.ToInt64(result); // Explicitly cast to int
+                        currentGameId = (int)Convert.ToInt64(result);
                     }
                 }
             }
@@ -133,34 +112,22 @@ namespace GUI.Client.Controllers
         /// <param name="snake">
         ///     An instance of the Snake class containing details of the snake to be added to the database.
         /// </param>
-        public async Task AddNewSnakeToDatabaseAsync(Snake snake)
+        private async Task AddNewSnakeToDatabaseAsync(Snake snake)
         {
             try
             {
-                // Format the current DateTime to match MySQL's expected format
                 string formattedEnterTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the database connection
                     await databaseConnection.OpenAsync();
-
-                    // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
-
-                    // SQL Command
                     command.CommandText = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES (@id, @name, @maxScore, @enterTime, NULL, @gameId);";
-
-                    // Add the parameters to the SQL query
                     command.Parameters.AddWithValue("@id", snake.SnakeID);
                     command.Parameters.AddWithValue("@name", snake.PlayerName);
                     command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
                     command.Parameters.AddWithValue("@enterTime", formattedEnterTime);
                     command.Parameters.AddWithValue("@gameId", currentGameId);
-
-                    // Run/execute the command
-                    // No need for the while loop because we arent doing a query
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -178,29 +145,18 @@ namespace GUI.Client.Controllers
         /// <param name="snakeId">The unique ID of the snake (player) whose max score is being updated.</param>
         /// <param name="newScore">The new max score to update in the database.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task UpdatePlayerMaxScoreInDatabaseAsync(int snakeId, int newScore)
+        private async Task UpdatePlayerMaxScoreInDatabaseAsync(int snakeId, int newScore)
         {
             try
             {
-                // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the database connection
                     await databaseConnection.OpenAsync();
-
-                    // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
-
-                    // SQL Command
                     command.CommandText = "UPDATE Players SET max_score = @newScore WHERE id = @snakeId AND game_id = @gameId;";
-
-                    // Add the parameters to the SQL query
                     command.Parameters.AddWithValue("@newScore", newScore);
                     command.Parameters.AddWithValue("@snakeId", snakeId);
                     command.Parameters.AddWithValue("@gameId", currentGameId);
-
-                    // Run/execute the command
-                    // No need for the while loop because we arent doing a query
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -223,27 +179,15 @@ namespace GUI.Client.Controllers
         {
             try
             {
-                // Format the current DateTime to match MySQL's expected format
                 string formattedLeaveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the database connection
                     await databaseConnection.OpenAsync();
-
-                    // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
-
-                    // SQL query to update leave_time for the current player
                     command.CommandText = "UPDATE Players SET leave_time = @leaveTime WHERE id = @snakeId;";
-
-                    // Add the parameters to the SQL query
                     command.Parameters.AddWithValue("@leaveTime", formattedLeaveTime);
                     command.Parameters.AddWithValue("@snakeId", snakeId);
-
-                    // Run/execute the command
-                    // No need for the while loop because we arent doing a query
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -262,27 +206,15 @@ namespace GUI.Client.Controllers
         {
             try
             {
-                // Format the current DateTime to match MySQL's expected format
                 string formattedEndTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                // Create a connection to the database
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    // Open the connection
                     await databaseConnection.OpenAsync();
-
-                    // Create a command
                     MySqlCommand command = databaseConnection.CreateCommand();
-
-                    // SQL Command
                     command.CommandText = "UPDATE Games SET end_time = @endTime WHERE id = @currentGameId;";
-
-                    // Add the parameters to the SQL query
                     command.Parameters.AddWithValue("@endTime", formattedEndTime);
                     command.Parameters.AddWithValue("@currentGameId", currentGameId);
-
-                    // Run/execute the command
-                    // No need for the while loop because we arent doing a query
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -323,7 +255,7 @@ namespace GUI.Client.Controllers
         ///     Processes each message received by delegating to the <see cref="HandleServerData(string)"/> method.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task ReceiveFromServerAsync()
+        private async Task ReceiveFromServerAsync()
         {
             while (network.IsConnected)
             {
@@ -373,14 +305,10 @@ namespace GUI.Client.Controllers
                     {
                         worldSize = parsedWorldSize;
                         receivedSize = true;
-
                         TheWorld = new World(worldSize);
                         Snake userSnake = new();
-
                         userSnake.SetPlayerName(playerName);
                         userSnake.SetSnakeID(PlayerID);
-
-                        // Add snake (user) into database
                         _ = AddNewSnakeToDatabaseAsync(userSnake);
 
                         lock (TheWorld)
@@ -390,7 +318,6 @@ namespace GUI.Client.Controllers
                     }
                 }
             }
-
             else
             {
                 ParseJsonData(message);
@@ -453,11 +380,9 @@ namespace GUI.Client.Controllers
                     // If the snake is valid
                     if (snake != null && TheWorld?.Snakes != null)
                     {
-
                         // If the snake disconnected
                         if (snake.PlayerDisconnected)
                         {
-                            // Update leave time for that player (others) in the database
                             _ = UpdatePlayerLeaveTimeInDatabaseAsync(snake.SnakeID);
 
                             lock (TheWorld)
@@ -466,14 +391,12 @@ namespace GUI.Client.Controllers
                                 TheWorld.Snakes.Remove(snake.SnakeID);
                             }
                         }
-
                         // If the snake is new or already exists
                         else
                         {
                             // If the snake is new
                             if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
                             {
-                                // Add snake (others) into database
                                 _ = AddNewSnakeToDatabaseAsync(snake);
 
                                 lock (TheWorld)
@@ -494,8 +417,7 @@ namespace GUI.Client.Controllers
                                 // If current score is greater than max score
                                 if (snake.PlayerScore > snake.PlayerMaxScore)
                                 {
-                                    // Update locally
-                                    snake.PlayerMaxScore = snake.PlayerScore;
+                                    snake.UpdatePlayerMaxScore(snake.PlayerScore);
 
                                     // Update database
                                     _ = UpdatePlayerMaxScoreInDatabaseAsync(snake.SnakeID, snake.PlayerMaxScore);
@@ -504,7 +426,6 @@ namespace GUI.Client.Controllers
                         }
                     }
                 }
-
             }
             catch (Exception)
             {
@@ -569,6 +490,5 @@ namespace GUI.Client.Controllers
         {
             commandSentThisFrame = false;
         }
-
     }
 }

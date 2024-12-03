@@ -116,9 +116,7 @@
                 connection.Send(playerName);
                 networkController = new NetworkController(connection, playerName);
 
-                // Log the start of a new game
                 await networkController.AddNewGameToDatabaseAsync();
-
                 await networkController.NetworkLoopAsync(networkController);
             }
             catch (Exception)
@@ -151,10 +149,8 @@
     {
         if (connection.IsConnected)
         {
-            // Update leave time for that player (me) in the database
             _ = networkController.UpdatePlayerLeaveTimeInDatabaseAsync(networkController.PlayerID);
 
-            // Update ending time for this game in database
             _ = networkController.UpdateGameEndTimeInDatabaseAsync();
 
             connection.Disconnect();
@@ -402,7 +398,6 @@
 
             await DrawSnakeEyesAsync(head.X, head.Y);
         }
-
     }
 
     /// <summary>
@@ -521,7 +516,6 @@
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task DrawExplosionAsync(double x, double y)
     {
-        // Can change
         int numParticles = 10;
         Random random = new Random();
 
@@ -543,5 +537,4 @@
             await context.FillAsync();
         }
     }
-
 }

@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 
 namespace GUI.Client.Controllers
 {
-
     /// <summary>
     ///     Wraps the StreamReader/Writer/TcpClient together so we
     ///     don't have to keep creating all three for network actions.
@@ -71,10 +70,7 @@ namespace GUI.Client.Controllers
         ///         Create a network connection object.  The tcpClient will be unconnected at the start.
         ///     </para>
         /// </summary>
-        public NetworkConnection()
-            : this(new TcpClient())
-        {
-        }
+        public NetworkConnection() : this(new TcpClient()) { }
 
         /// <summary>
         ///     Try to connect to the given host:port. 
@@ -142,7 +138,6 @@ namespace GUI.Client.Controllers
             {
                 return null;
             }
-
         }
 
         /// <summary>
