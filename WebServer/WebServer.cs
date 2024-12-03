@@ -1,6 +1,8 @@
 ﻿// Name: Harrison Doppelt and Victor Valdez Landa
 // Date: 11/20/2024
 
+// http://localhost:8080/
+
 using GUI.Client.Controllers;
 using GUI.Client.Models;
 using MySql.Data.MySqlClient;
@@ -12,9 +14,6 @@ namespace WebServer
 {
     internal class WebServer
     {
-
-        // http://localhost:8080/
-
         private const string httpOkHeader = "HTTP/1.1 200 OK\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n";
 
         private const string httpBadHeader = "HTTP/1.1 404 Not Found\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n" + "\r\n";
@@ -77,7 +76,7 @@ namespace WebServer
                     {
                         int gameId = reader.GetInt32(0);
                         string startTime = reader.GetDateTime(1).ToString("yyyy-MM-dd HH:mm:ss");
-                        string endTime = reader.IsDBNull(2) ? "NULL" : reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss");
+                        string endTime = reader.IsDBNull(2) ? "" : reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss");
 
                         games.Add((gameId, startTime, endTime));
                     }
@@ -117,7 +116,6 @@ namespace WebServer
 
         private static string GetSpecificGamePage(int gameId)
         {
-            string specificGameHtml = string.Empty;
             string playersHtml = string.Empty;
 
             using (MySqlConnection databaseConnection = new MySqlConnection(NetworkController.connectionString))
@@ -139,13 +137,13 @@ namespace WebServer
                         string playerName = reader.GetString(1);
                         int maxScore = reader.GetInt32(2);
                         string enterTime = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
-                        string leaveTime = reader.IsDBNull(4) ? "NULL" : reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                        string leaveTime = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
 
                         playersHtml += $"<tr><td>{playerId}</td><td>{playerName}</td><td>{maxScore}</td>" + $"<td>{enterTime}</td><td>{leaveTime}</td></tr>";
                     }
                 }
 
-                return $"<html><h3>Stats for Game {gameId}</h3>{specificGameHtml}{playersHtml}</html>";
+                return $"<html><h3>Stats for Game {gameId}</h3>{playersHtml}</html>";
             }
         }
     }
