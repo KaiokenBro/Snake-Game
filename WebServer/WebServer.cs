@@ -28,7 +28,7 @@ namespace WebServer
         /// <param name="args">Command-line arguments (not used).</param>
         static void Main(string[] args)
         {
-            Server.StartServer(HandleHttpConnection, 8080);
+            Server.StartServer(HandleHttpConnection, 80);
 
             // Prevent main from returning
             Console.Read();
