@@ -84,9 +84,9 @@ namespace GUI.Client.Controllers
                 {
                     databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
-                    command.CommandText = "INSERT INTO Games (start_time, end_time) VALUES (@startTime, NULL);";
-                    command.Parameters.AddWithValue("@startTime", formattedStartTime);
+                    command.CommandText = $"INSERT INTO Games (start_time, end_time) VALUES ('{formattedStartTime}', NULL);";
                     command.ExecuteNonQuery();
+
                     string selectQuery = "SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand selectCommand = new MySqlCommand(selectQuery, databaseConnection))
@@ -123,12 +123,7 @@ namespace GUI.Client.Controllers
                 {
                     databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
-                    command.CommandText = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES (@id, @name, @maxScore, @enterTime, NULL, @gameId);";
-                    command.Parameters.AddWithValue("@id", snake.SnakeID);
-                    command.Parameters.AddWithValue("@name", snake.PlayerName);
-                    command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
-                    command.Parameters.AddWithValue("@enterTime", formattedEnterTime);
-                    command.Parameters.AddWithValue("@gameId", currentGameId);
+                    command.CommandText = $"INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES ({snake.SnakeID}, '{snake.PlayerName}', {snake.PlayerMaxScore}, '{formattedEnterTime}', NULL, {currentGameId});";
                     command.ExecuteNonQuery();
                 }
             }
@@ -154,10 +149,7 @@ namespace GUI.Client.Controllers
                 {
                     databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
-                    command.CommandText = "UPDATE Players SET max_score = @newScore WHERE id = @snakeId AND game_id = @gameId;";
-                    command.Parameters.AddWithValue("@newScore", newScore);
-                    command.Parameters.AddWithValue("@snakeId", snakeId);
-                    command.Parameters.AddWithValue("@gameId", currentGameId);
+                    command.CommandText = $"UPDATE Players SET max_score = {newScore} WHERE id = {snakeId} AND game_id = {currentGameId};";
                     command.ExecuteNonQuery();
                 }
             }
@@ -186,9 +178,7 @@ namespace GUI.Client.Controllers
                 {
                     databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
-                    command.CommandText = "UPDATE Players SET leave_time = @leaveTime WHERE id = @snakeId;";
-                    command.Parameters.AddWithValue("@leaveTime", formattedLeaveTime);
-                    command.Parameters.AddWithValue("@snakeId", snakeId);
+                    command.CommandText = $"UPDATE Players SET leave_time = '{formattedLeaveTime}' WHERE id = {snakeId};";
                     command.ExecuteNonQuery();
                 }
             }
@@ -213,9 +203,7 @@ namespace GUI.Client.Controllers
                 {
                     databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
-                    command.CommandText = "UPDATE Games SET end_time = @endTime WHERE id = @currentGameId;";
-                    command.Parameters.AddWithValue("@endTime", formattedEndTime);
-                    command.Parameters.AddWithValue("@currentGameId", currentGameId);
+                    command.CommandText = $"UPDATE Games SET end_time = '{formattedEndTime}' WHERE id = {currentGameId};";
                     command.ExecuteNonQuery();
                 }
             }
@@ -422,7 +410,7 @@ namespace GUI.Client.Controllers
                                     snake.UpdatePlayerMaxScore(snake.PlayerScore);
 
                                     // Update database
-                                    //UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
+                                    UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }
