@@ -74,7 +74,7 @@ namespace GUI.Client.Controllers
         ///     
         ///     This method is called in the ConnectToServerAsync method if the SnakeGUI.razor class.
         /// </summary>
-        public async Task AddNewGameToDatabaseAsync()
+        public void AddNewGameToDatabase()
         {
             try
             {
@@ -82,11 +82,11 @@ namespace GUI.Client.Controllers
 
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    await databaseConnection.OpenAsync();
+                    databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
                     command.CommandText = "INSERT INTO Games (start_time, end_time) VALUES (@startTime, NULL);";
                     command.Parameters.AddWithValue("@startTime", formattedStartTime);
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery();
                     string selectQuery = "SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand selectCommand = new MySqlCommand(selectQuery, databaseConnection))
@@ -113,7 +113,7 @@ namespace GUI.Client.Controllers
         /// <param name="snake">
         ///     An instance of the Snake class containing details of the snake to be added to the database.
         /// </param>
-        private async Task AddNewSnakeToDatabaseAsync(Snake snake)
+        private void AddNewSnakeToDatabase(Snake snake)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace GUI.Client.Controllers
 
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    await databaseConnection.OpenAsync();
+                    databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
                     command.CommandText = "INSERT INTO Players (id, name, max_score, enter_time, leave_time, game_id) VALUES (@id, @name, @maxScore, @enterTime, NULL, @gameId);";
                     command.Parameters.AddWithValue("@id", snake.SnakeID);
@@ -129,7 +129,7 @@ namespace GUI.Client.Controllers
                     command.Parameters.AddWithValue("@maxScore", snake.PlayerMaxScore);
                     command.Parameters.AddWithValue("@enterTime", formattedEnterTime);
                     command.Parameters.AddWithValue("@gameId", currentGameId);
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -146,19 +146,19 @@ namespace GUI.Client.Controllers
         /// <param name="snakeId">The unique ID of the snake (player) whose max score is being updated.</param>
         /// <param name="newScore">The new max score to update in the database.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task UpdatePlayerMaxScoreInDatabaseAsync(int snakeId, int newScore)
+        private void UpdatePlayerMaxScoreInDatabase(int snakeId, int newScore)
         {
             try
             {
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    await databaseConnection.OpenAsync();
+                    databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
                     command.CommandText = "UPDATE Players SET max_score = @newScore WHERE id = @snakeId AND game_id = @gameId;";
                     command.Parameters.AddWithValue("@newScore", newScore);
                     command.Parameters.AddWithValue("@snakeId", snakeId);
                     command.Parameters.AddWithValue("@gameId", currentGameId);
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -176,7 +176,7 @@ namespace GUI.Client.Controllers
         /// <param name="snakeId">
         ///     The ID of the snake (player) whose leave time is being updated.
         /// </param>
-        public async Task UpdatePlayerLeaveTimeInDatabaseAsync(int snakeId)
+        public void UpdatePlayerLeaveTimeInDatabase(int snakeId)
         {
             try
             {
@@ -184,12 +184,12 @@ namespace GUI.Client.Controllers
 
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    await databaseConnection.OpenAsync();
+                    databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
                     command.CommandText = "UPDATE Players SET leave_time = @leaveTime WHERE id = @snakeId;";
                     command.Parameters.AddWithValue("@leaveTime", formattedLeaveTime);
                     command.Parameters.AddWithValue("@snakeId", snakeId);
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -203,7 +203,7 @@ namespace GUI.Client.Controllers
         ///     
         ///     This method is called in the DisconnectFromServer method in SnakeGUI.razor class to record when a game ends.
         /// </summary>
-        public async Task UpdateGameEndTimeInDatabaseAsync()
+        public void UpdateGameEndTimeInDatabase()
         {
             try
             {
@@ -211,12 +211,12 @@ namespace GUI.Client.Controllers
 
                 using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
                 {
-                    await databaseConnection.OpenAsync();
+                    databaseConnection.Open();
                     MySqlCommand command = databaseConnection.CreateCommand();
                     command.CommandText = "UPDATE Games SET end_time = @endTime WHERE id = @currentGameId;";
                     command.Parameters.AddWithValue("@endTime", formattedEndTime);
                     command.Parameters.AddWithValue("@currentGameId", currentGameId);
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -310,7 +310,7 @@ namespace GUI.Client.Controllers
                         Snake userSnake = new();
                         userSnake.SetPlayerName(playerName);
                         userSnake.SetSnakeID(PlayerID);
-                        _ = AddNewSnakeToDatabaseAsync(userSnake);
+                        AddNewSnakeToDatabase(userSnake);
 
                         lock (TheWorld)
                         {
@@ -384,7 +384,7 @@ namespace GUI.Client.Controllers
                         // If the snake disconnected
                         if (snake.PlayerDisconnected)
                         {
-                            _ = UpdatePlayerLeaveTimeInDatabaseAsync(snake.SnakeID);
+                            UpdatePlayerLeaveTimeInDatabase(snake.SnakeID);
 
                             lock (TheWorld)
                             {
@@ -398,7 +398,7 @@ namespace GUI.Client.Controllers
                             // If the snake is new
                             if (!TheWorld.Snakes.ContainsKey(snake.SnakeID))
                             {
-                                _ = AddNewSnakeToDatabaseAsync(snake);
+                                AddNewSnakeToDatabase(snake);
 
                                 lock (TheWorld)
                                 {
@@ -418,11 +418,11 @@ namespace GUI.Client.Controllers
                                 // If current score is greater than max score
                                 if (snake.PlayerScore > snake.PlayerMaxScore)
                                 {
+                                    // Update database
+                                    UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
+
                                     // Update Player Max Score
                                     snake.UpdatePlayerMaxScore(snake.PlayerScore);
-
-                                    // Update database
-                                    _ = UpdatePlayerMaxScoreInDatabaseAsync(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }

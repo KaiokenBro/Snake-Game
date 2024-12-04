@@ -116,7 +116,7 @@
                 connection.Send(playerName);
                 networkController = new NetworkController(connection, playerName);
 
-                await networkController.AddNewGameToDatabaseAsync();
+                networkController.AddNewGameToDatabase();
                 await networkController.NetworkLoopAsync(networkController);
             }
             catch (Exception)
@@ -149,9 +149,9 @@
     {
         if (connection.IsConnected)
         {
-            _ = networkController.UpdatePlayerLeaveTimeInDatabaseAsync(networkController.PlayerID);
+            networkController.UpdatePlayerLeaveTimeInDatabase(networkController.PlayerID);
 
-            _ = networkController.UpdateGameEndTimeInDatabaseAsync();
+            networkController.UpdateGameEndTimeInDatabase();
 
             connection.Disconnect();
         }
