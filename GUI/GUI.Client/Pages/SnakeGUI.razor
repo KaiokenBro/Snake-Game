@@ -117,7 +117,7 @@
                 networkController = new NetworkController(connection, playerName);
 
                 networkController.AddNewGameToDatabase();
-                await networkController.NetworkLoopAsync(networkController);
+                networkController.NetworkLoop(networkController);
             }
             catch (Exception)
             {

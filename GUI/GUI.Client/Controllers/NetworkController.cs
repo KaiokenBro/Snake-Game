@@ -229,7 +229,7 @@ namespace GUI.Client.Controllers
         ///     Continuously listens for messages from the server and processes them.
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task NetworkLoopAsync(NetworkController networkController)
+        public void NetworkLoop(NetworkController networkController)
         {
             while (network.IsConnected)
             {
@@ -237,7 +237,7 @@ namespace GUI.Client.Controllers
                 {
                     if (networkController != null)
                     {
-                        await ReceiveFromServerAsync();
+                        ReceiveFromServer();
                     }
                     else
                     {
@@ -256,7 +256,7 @@ namespace GUI.Client.Controllers
         ///     Processes each message received by delegating to the <see cref="HandleServerData(string)"/> method.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task ReceiveFromServerAsync()
+        private void ReceiveFromServer()
         {
             while (network.IsConnected)
             {
