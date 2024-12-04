@@ -4,6 +4,7 @@
 // 
 // Name: Harrison Doppelt and Victor Valdez Landa
 // Date: 11/20/2024
+// Database Password: CS3500
 
 using System.Net.Sockets;
 using System.Text;

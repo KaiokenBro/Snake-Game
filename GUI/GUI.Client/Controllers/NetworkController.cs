@@ -1,5 +1,6 @@
 ﻿// Name: Harrison Doppelt and Victor Valdez Landa
 // Date: 11/20/2024
+// Database Password: CS3500
 
 using GUI.Client.Models;
 using MySql.Data.MySqlClient;
@@ -412,14 +413,15 @@ namespace GUI.Client.Controllers
                                 {
                                     // Update the snake to the dictionary
                                     TheWorld.Snakes[snake.SnakeID] = snake;
-
-                                    snake.UpdatePlayerMaxScore(snake.PlayerScore);
                                 }
 
                                 // If current score is greater than max score
                                 if (snake.PlayerScore > snake.PlayerMaxScore)
                                 {
-                                    //snake.UpdatePlayerMaxScore(snake.PlayerScore);
+                                    // Update Player Max Score
+                                    snake.UpdatePlayerMaxScore(snake.PlayerScore);
+
+                                    // Update database
                                     _ = UpdatePlayerMaxScoreInDatabaseAsync(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }

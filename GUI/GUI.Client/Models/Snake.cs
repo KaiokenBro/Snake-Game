@@ -28,7 +28,7 @@ namespace GUI.Client.Models
         ///     Property that gets or sets the player's max score, representing the max number of powerups collected in a single life.
         /// </summary>
         [JsonIgnore]
-        public int PlayerMaxScore { get; set; } = 0;
+        public int PlayerMaxScore { get; private set; } = 0;
 
         /// <summary>
         ///     Property that gets or sets a value indicating whether the player joined on this frame.

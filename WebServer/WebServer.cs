@@ -1,6 +1,6 @@
 ﻿// Name: Harrison Doppelt and Victor Valdez Landa
 // Date: 11/20/2024
-
+// Database Password: CS3500
 // http://localhost:8080/
 
 using GUI.Client.Controllers;
@@ -12,10 +12,20 @@ using System.Text;
 
 namespace WebServer
 {
+    /// <summary>
+    ///     A simple HTTP web server for handling Snake game database requests.
+    /// </summary>
     internal class WebServer
     {
+        /// <summary>
+        ///     The HTTP response header template for successful requests.
+        /// </summary>
         private const string httpOkHeader = "HTTP/1.1 200 OK\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n";
 
+        /// <summary>
+        ///     The entry point of the web server application.
+        /// </summary>
+        /// <param name="args">Command-line arguments (not used).</param>
         static void Main(string[] args)
         {
             Server.StartServer(HandleHttpConnection, 8080);
@@ -24,6 +34,10 @@ namespace WebServer
             Console.Read();
         }
 
+        /// <summary>
+        ///     Handles an HTTP connection from a client.
+        /// </summary>
+        /// <param name="client">The client connection to handle.</param>
         private static void HandleHttpConnection(NetworkConnection client)
         {
             string request = client.ReadLine();
@@ -57,6 +71,10 @@ namespace WebServer
             client.Disconnect();
         }
 
+        /// <summary>
+        ///     Generates the HTML page containing a list of all games in the database.
+        /// </summary>
+        /// <returns>An HTML string representing the table of all games.</returns>
         private static string GetGamePage()
         {
             var games = new List<(int GameId, string StartTime, string EndTime)>();
@@ -99,6 +117,11 @@ namespace WebServer
             return gamesHtml;
         }
 
+        /// <summary>
+        ///     Parses the game ID from an HTTP request URL.
+        /// </summary>
+        /// <param name="request">The HTTP request string containing the game ID parameter.</param>
+        /// <returns>The game ID as an integer, or -1 if parsing fails.</returns>
         private static int ParseGameId(string request)
         {
             int startIndex = request.IndexOf("?gid=") + 5;
@@ -112,6 +135,11 @@ namespace WebServer
             return -1;
         }
 
+        /// <summary>
+        ///     Generates the HTML page containing detailed statistics for a specific game.
+        /// </summary>
+        /// <param name="gameId">The ID of the game to generate the statistics page for.</param>
+        /// <returns>An HTML string representing the table of player statistics for the specified game.</returns>
         private static string GetSpecificGamePage(int gameId)
         {
             string playersHtml = string.Empty;
