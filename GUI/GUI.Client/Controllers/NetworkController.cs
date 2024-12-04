@@ -262,7 +262,7 @@ namespace GUI.Client.Controllers
             {
                 try
                 {
-                    string message = await Task.Run(network.ReadLine);
+                    string message = network.ReadLine();
 
                     if (message == null)
                     {
@@ -418,11 +418,11 @@ namespace GUI.Client.Controllers
                                 // If current score is greater than max score
                                 if (snake.PlayerScore > snake.PlayerMaxScore)
                                 {
-                                    // Update database
-                                    UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
-
                                     // Update Player Max Score
                                     snake.UpdatePlayerMaxScore(snake.PlayerScore);
+
+                                    // Update database
+                                    //UpdatePlayerMaxScoreInDatabase(snake.SnakeID, snake.PlayerMaxScore);
                                 }
                             }
                         }
