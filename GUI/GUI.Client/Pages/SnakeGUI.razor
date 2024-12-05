@@ -115,7 +115,6 @@
                 connection.Connect(ServerNameOrAddress, ServerPort);
                 connection.Send(playerName);
                 networkController = new NetworkController(connection, playerName);
-
                 networkController.AddNewGameToDatabase();
 
                 // Start the NetworkLoop on a dedicated thread

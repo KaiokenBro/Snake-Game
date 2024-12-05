@@ -143,20 +143,27 @@ namespace GUI.Client.Controllers
         /// <returns>A task representing the asynchronous operation.</returns>
         private void UpdatePlayerMaxScoreInDatabase(int snakeId, int newScore)
         {
-            try
+            // Create and start the thread inside this method
+            Thread databaseThread = new Thread(() =>
             {
-                using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                try
                 {
-                    databaseConnection.Open();
-                    MySqlCommand command = databaseConnection.CreateCommand();
-                    command.CommandText = $"UPDATE Players SET max_score = {newScore} WHERE id = {snakeId} AND game_id = {currentGameId};";
-                    command.ExecuteNonQuery();
+                    using (MySqlConnection databaseConnection = new MySqlConnection(connectionString))
+                    {
+                        databaseConnection.Open();
+                        MySqlCommand command = databaseConnection.CreateCommand();
+                        command.CommandText = $"UPDATE Players SET max_score = {newScore} WHERE id = {snakeId} AND game_id = {currentGameId};";
+                        command.ExecuteNonQuery();
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error updating max score for player {snakeId}: {ex.Message}");
-            }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating max score for player {snakeId}: {ex.Message}");
+                }
+            });
+
+            databaseThread.IsBackground = true; // Make it a background thread
+            databaseThread.Start();
         }
 
         /// <summary>
@@ -397,6 +404,13 @@ namespace GUI.Client.Controllers
                             // If the snake already exists
                             else
                             {
+
+                                // Retrieve the existing snake
+                                Snake existingSnake = TheWorld.Snakes[snake.SnakeID];
+
+                                // Retain the PlayerMaxScore from the existing snake
+                                snake.PlayerMaxScore = existingSnake.PlayerMaxScore;
+
                                 lock (TheWorld)
                                 {
                                     // Update the snake to the dictionary
