@@ -72,7 +72,7 @@ namespace GUI.Client.Controllers
         ///     Inserts a new row into the "Games" table in the database, recording the start time of the game.
         ///     Also retrieves the ID of the newly created game for future use.
         ///     
-        ///     This method is called in the ConnectToServerAsync method if the SnakeGUI.razor class.
+        ///     This method is called in the ConnectToServerAsync method in the SnakeGUI.razor class.
         /// </summary>
         public void AddNewGameToDatabase()
         {
@@ -140,7 +140,6 @@ namespace GUI.Client.Controllers
         /// </summary>
         /// <param name="snakeId">The unique ID of the snake (player) whose max score is being updated.</param>
         /// <param name="newScore">The new max score to update in the database.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         private void UpdatePlayerMaxScoreInDatabase(int snakeId, int newScore)
         {
             // Create and start the thread inside this method
@@ -223,7 +222,6 @@ namespace GUI.Client.Controllers
         /// <summary>
         ///     Continuously listens for messages from the server and processes them.
         /// </summary>
-        /// <returns>A task that represents the asynchronous operation.</returns>
         public void NetworkLoop(NetworkController networkController)
         {
             while (network.IsConnected)
@@ -250,7 +248,6 @@ namespace GUI.Client.Controllers
         ///     Continuously receives data from the server while the connection is active.
         ///     Processes each message received by delegating to the <see cref="HandleServerData(string)"/> method.
         /// </summary>
-        /// <returns>A task representing the asynchronous operation.</returns>
         private void ReceiveFromServer()
         {
             while (network.IsConnected)
@@ -404,12 +401,11 @@ namespace GUI.Client.Controllers
                             // If the snake already exists
                             else
                             {
-
                                 // Retrieve the existing snake
                                 Snake existingSnake = TheWorld.Snakes[snake.SnakeID];
 
                                 // Retain the PlayerMaxScore from the existing snake
-                                snake.PlayerMaxScore = existingSnake.PlayerMaxScore;
+                                snake.UpdatePlayerMaxScore(existingSnake.PlayerMaxScore);
 
                                 lock (TheWorld)
                                 {

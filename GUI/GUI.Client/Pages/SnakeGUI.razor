@@ -130,7 +130,7 @@
                     }
                 })
                 {
-                    IsBackground = true // Make it a background thread
+                    IsBackground = true
                 };
                 networkThread.Start();
             }
@@ -165,9 +165,7 @@
         if (connection.IsConnected)
         {
             networkController.UpdatePlayerLeaveTimeInDatabase(networkController.PlayerID);
-
             networkController.UpdateGameEndTimeInDatabase();
-
             connection.Disconnect();
         }
     }

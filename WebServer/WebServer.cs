@@ -1,7 +1,6 @@
 ﻿// Name: Harrison Doppelt and Victor Valdez Landa
 // Date: 11/20/2024
 // Database Password: CS3500
-// http://localhost:8080/
 
 using GUI.Client.Controllers;
 using GUI.Client.Models;
@@ -19,6 +18,7 @@ namespace WebServer
     {
         /// <summary>
         ///     The HTTP response header template for successful requests.
+        ///     Content-Length is dynamically created in HandleHttpConnection.
         /// </summary>
         private const string httpOkHeader = "HTTP/1.1 200 OK\r\n" + "Connection: close\r\n" + "Content-Type: text/html; charset=UTF-8\r\n";
 
