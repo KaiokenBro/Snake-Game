@@ -28,7 +28,7 @@ ASP.NET Core
 
 Clone the repository:
 
-git clone https://github.com/your-username/Snake-Game.git
+git clone https://github.com/hdoppelt/Snake-Game.git
 
 Open Snake.sln in Visual Studio.
 
