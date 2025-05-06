@@ -1,11 +1,4 @@
-﻿// <copyright file="ChatServer.cs" company="UofU-CS3500">
-//     Copyright (c) 2024 UofU-CS3500. All rights reserved.
-// </copyright>
-// 
-// Name: Harrison Doppelt and Victor Valdez Landa
-// Date: 11/03/2024
-
-using CS3500.Networking;
+﻿using CS3500.Networking;
 using System;
 using System.Text;
 

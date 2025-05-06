@@ -1,6 +1,4 @@
-﻿// Name: Harrison Doppelt and Victor Valdez Landa
-// Date: 11/20/2024
-// Database Password: CS3500
+﻿// Database Password: CS3500
 
 using GUI.Client.Controllers;
 using GUI.Client.Models;

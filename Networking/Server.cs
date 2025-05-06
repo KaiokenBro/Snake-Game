@@ -1,11 +1,4 @@
-﻿// <copyright file="Server.cs" company="UofU-CS3500">
-//     Copyright (c) 2024 UofU-CS3500. All rights reserved.
-// </copyright>
-// 
-// Name: Harrison Doppelt and Victor Valdez Landa
-// Date: 11/03/2024
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;

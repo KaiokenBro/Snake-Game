@@ -1,10 +1,4 @@
-﻿// <copyright file="NetworkConnection.cs" company="UofU-CS3500">
-//     Copyright (c) 2024 UofU-CS3500. All rights reserved.
-// </copyright>
-// 
-// Name: Harrison Doppelt and Victor Valdez Landa
-// Date: 11/20/2024
-// Database Password: CS3500
+﻿// Database Password: CS3500
 
 using System.Net.Sockets;
 using System.Text;

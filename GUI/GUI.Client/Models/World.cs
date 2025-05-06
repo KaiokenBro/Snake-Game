@@ -1,7 +1,4 @@
-﻿// Name: Harrison Doppelt and Victor Valdez Landa
-// Date: 11/20/2024
-
-using System.Drawing;
+﻿using System.Drawing;
 using System.Numerics;
 
 namespace GUI.Client.Models
