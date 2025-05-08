@@ -1,6 +1,4 @@
 ﻿using CS3500.Networking;
-using System;
-using System.Text;
 
 namespace CS3500.Chatting;
 
