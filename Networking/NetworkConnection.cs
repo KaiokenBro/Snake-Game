@@ -53,7 +53,7 @@ public sealed class NetworkConnection : IDisposable
         if (IsConnected)
         {
             _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) {AutoFlush = true};
         }
     }
 
@@ -80,7 +80,7 @@ public sealed class NetworkConnection : IDisposable
         {
             _tcpClient.Connect(host, port);
             _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) {AutoFlush = true};
         }
     }
 

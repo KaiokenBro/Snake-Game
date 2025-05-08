@@ -14,7 +14,7 @@
         <input id="url" disabled="@network.IsConnected" type="text" @bind="ServerNameOrAddress" />
         <label for="url"> Port: </label>
         <input id="port" disabled="@network.IsConnected" type="number" @bind="ServerPort" class="port" />
-        @if ( network.IsConnected )
+        @if (network.IsConnected)
         {
             <button class="btn btn-primary" @onclick="DisconnectFromServer">Disconnect</button>
         }
@@ -72,21 +72,20 @@
     private NetworkConnection network = null!;
 
     /// <summary>
+    /// All of the messages seen by the server
+    /// </summary>
+    private List<string> AllMessages = new();
+
+    /// <summary>
     /// The string shown in the message display area, representing all messages seen
     /// </summary>
     private string MessageDisplayTextAreaData
     {
         get
         {
-            return string.Join( "\n", AllMessages );
+            return string.Join("\n", AllMessages);
         }
     }
-
-    /// <summary>
-    /// All of the messages seen by the server
-    /// </summary>
-    private List<string> AllMessages = new();
-
 
     /// <summary>
     /// Disconnect the network object from the server.
@@ -105,13 +104,12 @@
     {
         try
         {
-            network.Connect( ServerNameOrAddress, ServerPort );
+            network.Connect(ServerNameOrAddress, ServerPort);
 
-            // Communicating with the server needs to be asynchronous so that the UI thread 
-            // can continue drawing.
+            // Communicating with the server needs to be asynchronous so that the UI thread can continue drawing.
             new Thread( () =>
             {
-                while ( network.IsConnected )
+                while (network.IsConnected)
                 {
                     try
                     {
@@ -124,8 +122,7 @@
                             AllMessages.Insert(0, message);
                         }
 
-                        // Since we are changing the UI from another thread, we need to 
-                        // use the dispatcher for StateHasChanged
+                        // Since we are changing the UI from another thread, we need to use the dispatcher for StateHasChanged
                         InvokeAsync( () => StateHasChanged() );
                     }
                     catch
@@ -147,11 +144,11 @@
     ///   to the server.
     /// </summary>
     /// <param name="e"> Event data containing the message. </param>
-    private void HandleSendMessage( ChangeEventArgs e )
+    private void HandleSendMessage(ChangeEventArgs e)
     {
-        if ( e.Value != null )
+        if (e.Value != null)
         {
-            network.Send( $"{e.Value}" );
+            network.Send($"{e.Value}");
         }
     }
 

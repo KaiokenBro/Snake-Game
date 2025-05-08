@@ -31,7 +31,7 @@ public partial class ChatServer
     /// <returns> A Task. Not really used. </returns>
     private static void Main(string[] args)
     {
-        Server.StartServer(HandleConnect, 11_000);
+        Server.StartServer(HandleConnect, 11000);
         Console.Read();
     }
 
@@ -52,7 +52,7 @@ public partial class ChatServer
             string clientName = connection.ReadLine();
 
             // Locked to prevent multiple List mutations at the same time
-            lock (clients)
+            lock(clients)
             {
                 // Add client to List
                 clients.Add(connection);
@@ -76,7 +76,7 @@ public partial class ChatServer
                     string message = connection.ReadLine();
 
                     // Locked so only one client can Broadcast at a time.
-                    lock (clients)
+                    lock(clients)
                     {
                         foreach (var client in clients)
                         {
@@ -94,7 +94,7 @@ public partial class ChatServer
                     Console.WriteLine($"{names[connection]} has disconnected.");
 
                     // Locked to prevent multiple List mutations at the same time
-                    lock (clients)
+                    lock(clients)
                     {
                         clients.Remove(connection);
                         names.Remove(connection);
