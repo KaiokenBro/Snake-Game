@@ -56,7 +56,7 @@ namespace GUI.Client.Controllers
         /// <summary>
         ///     Connection string used to establish a connection to the MySQL database.
         /// </summary>
-        public const string connectionString = "server=atr.eng.utah.edu;" + "database=u0674744;" + "uid=u0674744;" + "password=CS3500";
+        public const string connectionString = "server=localhost;" + "database=snake_game;" + "user=root;" + "password=admin";
 
         /// <summary>
         ///     Holds the ID of the current game session.
