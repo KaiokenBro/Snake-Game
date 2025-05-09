@@ -1,6 +1,4 @@
-﻿// Database Password: CS3500
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -31,12 +29,24 @@ namespace WebServer
         /// <param name="port"> The port (e.g., 11000) to listen on. </param>
         public static void StartServer(Action<NetworkConnection> handleHttpConnection, int port)
         {
+            // Add listener
             TcpListener listener = new(IPAddress.Any, port);
+
+            // Start listener
             listener.Start();
+
+            // Confirm server started
+            Console.WriteLine("Server started on port: " + port);
 
             while (true)
             {
+                // Create client and connect new client
                 TcpClient client = listener.AcceptTcpClient();
+
+                // Confirm client connected to server
+                Console.WriteLine("Client connected.");
+
+                // Create new thread for client and pass it off
                 new Thread(() => handleHttpConnection(new NetworkConnection(client))).Start();
             }
         }

@@ -1,6 +1,4 @@
-﻿// Database Password: CS3500
-
-using GUI.Client.Controllers;
+﻿using GUI.Client.Controllers;
 using GUI.Client.Models;
 using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI;

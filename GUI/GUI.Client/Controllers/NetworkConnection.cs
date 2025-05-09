@@ -1,6 +1,4 @@
-﻿// Database Password: CS3500
-
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
