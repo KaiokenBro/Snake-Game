@@ -2,11 +2,13 @@
 
 namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     Represents a powerup in the game, which can be collected by players.
     /// </summary>
     public class Powerup
     {
+
         /// <summary>
         ///     Property that gets or sets the unique ID for the powerup.
         /// </summary>

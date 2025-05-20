@@ -2,11 +2,13 @@
 
 namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     A class that represents a 2D point in space with X and Y coordinates.
     /// </summary>
     public class Point2D
     {
+
         /// <summary>
         ///     Property that gets or sets the X-coordinate of the point.
         /// </summary>

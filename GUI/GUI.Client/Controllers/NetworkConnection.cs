@@ -4,12 +4,14 @@ using System.Text.RegularExpressions;
 
 namespace GUI.Client.Controllers
 {
+
     /// <summary>
     ///     Wraps the StreamReader/Writer/TcpClient together so we
     ///     don't have to keep creating all three for network actions.
     /// </summary>
     public sealed class NetworkConnection : IDisposable
     {
+
         /// <summary>
         ///     The connection/socket abstraction
         /// </summary>

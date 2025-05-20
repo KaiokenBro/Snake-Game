@@ -1,13 +1,12 @@
-﻿using System.Drawing;
-using System.Numerics;
-
-namespace GUI.Client.Models
+﻿namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     Represents the game world containing snakes, walls, and powerups.
     /// </summary>
     public class World
     {
+
         /// <summary>
         ///     Collection of all snakes in the world, keyed by their unique IDs.
         /// </summary>

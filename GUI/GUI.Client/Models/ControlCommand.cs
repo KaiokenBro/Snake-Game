@@ -2,6 +2,7 @@
 
 namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     Represents a command to control the direction in which the player's snake should move.
     /// </summary>
@@ -11,6 +12,7 @@ namespace GUI.Client.Models
     /// </param>
     public class ControlCommand(string direction)
     {
+
         /// <summary>
         ///     Property that gets or sets the direction in which the player wants the snake to move.
         ///     Possible values are "up", "left", "down", or "right".

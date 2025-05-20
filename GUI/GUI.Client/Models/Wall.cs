@@ -2,11 +2,13 @@
 
 namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     Represents a wall in the game, with two endpoints defining its position.
     /// </summary>
     public class Wall
     {
+
         /// <summary>
         ///     Property that gets or sets the unique ID of the wall.
         /// </summary>

@@ -1,17 +1,16 @@
 ﻿using GUI.Client.Controllers;
-using GUI.Client.Models;
 using MySql.Data.MySqlClient;
-using MySqlX.XDevAPI;
-using System.Linq;
 using System.Text;
 
 namespace WebServer
 {
+
     /// <summary>
     ///     A simple HTTP web server for handling Snake game database requests.
     /// </summary>
     internal class WebServer
     {
+
         /// <summary>
         ///     The HTTP response header template for successful requests.
         ///     Content-Length is dynamically created in HandleHttpConnection.

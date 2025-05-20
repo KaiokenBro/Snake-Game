@@ -1,10 +1,10 @@
 ﻿using GUI.Client.Models;
 using MySql.Data.MySqlClient;
-using System.Data.Common;
 using System.Text.Json;
 
 namespace GUI.Client.Controllers
 {
+
     /// <summary>
     ///     Manages communication between the client and the server, maintaining the game state and processing server data.
     /// </summary>
@@ -12,6 +12,7 @@ namespace GUI.Client.Controllers
     /// <param name="playerName">The name of the player to associate with this controller.</param>
     public class NetworkController(NetworkConnection connection, string playerName)
     {
+
         /// <summary>
         ///     Represents the network connection used for communication with the server.
         /// </summary>
@@ -226,10 +227,12 @@ namespace GUI.Client.Controllers
                 {
                     if (networkController != null)
                     {
+
                         ReceiveFromServer();
                     }
                     else
                     {
+
                         break;
                     }
                 }
@@ -264,7 +267,6 @@ namespace GUI.Client.Controllers
                     break;
                 }
             }
-
             network.Disconnect();
         }
 

@@ -2,11 +2,13 @@
 
 namespace GUI.Client.Models
 {
+
     /// <summary>
     ///     Represents a snake in the game, controlled by a player.
     /// </summary>
     public class Snake
     {
+
         /// <summary>
         ///     Property that gets or sets the player's name.
         /// </summary>
